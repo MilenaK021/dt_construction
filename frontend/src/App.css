@@ -24,3 +24,25 @@
   max-width: 1100px;
   margin: 0 auto;
 }
+
+/* ── Projects list header ─────────────────────────────── */
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.new-project-btn {
+  background: #185FA5;
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-project-btn:hover { background: #0c447c; }
