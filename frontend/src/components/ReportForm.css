@@ -1,0 +1,66 @@
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dde1ea;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a1a2e;
+  background: #fafbfc;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #185FA5;
+  background: white;
+}
+
+.result-box {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.result-box.approved {
+  background: #eaf3de;
+  border-left: 4px solid #3B6D11;
+}
+
+.result-box.rejected {
+  background: #fcebeb;
+  border-left: 4px solid #A32D2D;
+}
+
+.result-status {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.result-feedback {
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.result-work {
+  font-size: 13px;
+  color: #666;
+}
