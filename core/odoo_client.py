@@ -81,7 +81,7 @@ if __name__ == "__main__":
     print("\n--- TASKS ---")
     tasks = client.get_tasks()
     for t in tasks:
-        print(f"  [{t['id']}] {t['name']} | deadline: {t['date_deadline']}")
+        print(f"  [{t['id']}] {t['name']} | stage: {t.get('stage_id')} | state: {t.get('state')}")
 
     print("\n--- EMPLOYEES ---")
     employees = client.get_employees()
