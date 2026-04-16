@@ -41,3 +41,28 @@
   color: #aaa;
   font-size: 14px;
 }
+
+.project-error {
+  background: #fdecea;
+  border-left: 4px solid #c62828;
+  border-radius: 8px;
+  padding: 16px 20px;
+  color: #c62828;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.project-error-hint {
+  color: #555;
+  margin-top: 8px;
+}
+
+.project-error-hint code {
+  display: inline-block;
+  margin-top: 4px;
+  background: #f4f4f4;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #1a1a2e;
+}

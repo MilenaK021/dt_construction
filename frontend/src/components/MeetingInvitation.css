@@ -1,35 +1,152 @@
-.hint {
-  font-size: 14px;
-  color: #888;
-  margin-bottom: 16px;
+.mi-root {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
-.primary-btn {
+.mi-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ── Fields ── */
+.mi-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.mi-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 160px;
+}
+
+.mi-field--wide {
+  flex: 1;
+  min-width: 260px;
+}
+
+.mi-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.mi-optional {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 400;
+}
+
+.mi-input {
+  padding: 9px 12px;
+  border: 1px solid #dde1ea;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a1a2e;
+  background: #fafbfc;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.mi-input:focus { border-color: #185FA5; background: white; }
+
+.mi-recipients {
+  resize: vertical;
+}
+
+/* ── Preview textarea ── */
+.mi-preview {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #dde1ea;
+  border-radius: 10px;
+  background: #f9fbff;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.75;
+  color: #1a1a2e;
+  resize: vertical;
+  outline: none;
+  border-left: 4px solid #185FA5;
+  transition: border-color 0.2s;
+}
+
+.mi-preview:focus { border-color: #185FA5; background: white; }
+
+/* ── Buttons ── */
+.mi-primary-btn {
   background: #185FA5;
   color: white;
   border: none;
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
   transition: background 0.2s;
 }
 
-.primary-btn:hover { background: #0c447c; }
-.primary-btn:disabled { background: #aaa; }
+.mi-primary-btn:hover    { background: #0c447c; }
+.mi-primary-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-.invitation-box {
-  margin-top: 20px;
-  background: #f4f6f9;
-  border-radius: 10px;
-  padding: 20px;
-  border-left: 4px solid #185FA5;
-}
-
-.invitation-box pre {
-  white-space: pre-wrap;
-  font-family: inherit;
+.mi-ghost-btn {
+  background: none;
+  border: 1px solid #dde1ea;
+  color: #555;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-size: 14px;
-  line-height: 1.7;
-  color: #1a1a2e;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
 }
+
+.mi-ghost-btn:hover { border-color: #185FA5; color: #185FA5; }
+
+.mi-send-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Spinner ── */
+.mi-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: mi-spin 0.7s linear infinite;
+}
+@keyframes mi-spin { to { transform: rotate(360deg); } }
+
+/* ── Error ── */
+.mi-error {
+  background: #fdecea;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+/* ── Sent state ── */
+.mi-sent {
+  text-align: center;
+  padding: 48px 20px;
+}
+
+.mi-sent-icon { font-size: 48px; margin-bottom: 16px; }
+.mi-sent h3   { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.mi-sent p    { font-size: 14px; color: #666; margin-bottom: 24px; }

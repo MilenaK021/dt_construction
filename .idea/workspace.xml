@@ -4,11 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="wouwoj">
+    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="task status refresh">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/odoo_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/odoo_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/TaskList.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/TaskList.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectList.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectList.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectList.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/TaskList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/TaskList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,12 +29,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/MilenaK021/dt_construction.git",
-    "accountId": "6ad687a7-8c8c-4908-9a0e-17ab5f0811a1"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;MilenaK021&quot;
   }
-}]]></component>
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/MilenaK021/dt_construction.git&quot;,
+    &quot;accountId&quot;: &quot;6ad687a7-8c8c-4908-9a0e-17ab5f0811a1&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -42,24 +52,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python. project_creator.executor": "Run",
-    "Python.database.executor": "Run",
-    "Python.engine.executor": "Run",
-    "Python.groq_client.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.odoo_client.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Node.js.ProjectList.jsx.executor&quot;: &quot;Run&quot;,
+    &quot;Python. project_creator.executor&quot;: &quot;Run&quot;,
+    &quot;Python.database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.engine.executor&quot;: &quot;Run&quot;,
+    &quot;Python.groq_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.odoo_client.executor&quot;: &quot;Run&quot;,
+    &quot;Python.project_creator.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\PyCharm 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\milen\PycharmProjects\dt_construction" />
@@ -83,6 +96,8 @@
       <updated>1774613204669</updated>
       <workItem from="1774613206022" duration="2297000" />
       <workItem from="1774703896704" duration="17503000" />
+      <workItem from="1776238121802" duration="11098000" />
+      <workItem from="1776361296676" duration="1745000" />
     </task>
     <task id="LOCAL-00001" summary="wouwo">
       <option name="closed" value="true" />
@@ -100,7 +115,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775848472785</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="task status refresh">
+      <option name="closed" value="true" />
+      <created>1775890153336</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1775890153336</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -109,14 +132,16 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="wouwo" />
     <MESSAGE value="wouwoj" />
-    <option name="LAST_COMMIT_MESSAGE" value="wouwoj" />
+    <MESSAGE value="task status refresh" />
+    <option name="LAST_COMMIT_MESSAGE" value="task status refresh" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/dt_construction$_project_creator.coverage" NAME=" project_creator Coverage Results" MODIFIED="1775641279433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
-    <SUITE FILE_PATH="coverage/dt_construction$odoo_client.coverage" NAME="odoo_client Coverage Results" MODIFIED="1775889958884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core" />
+    <SUITE FILE_PATH="coverage/dt_construction$project_creator.coverage" NAME="project_creator Coverage Results" MODIFIED="1776196370276" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
+    <SUITE FILE_PATH="coverage/dt_construction$odoo_client.coverage" NAME="odoo_client Coverage Results" MODIFIED="1776196269447" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core" />
     <SUITE FILE_PATH="coverage/dt_construction$groq_client.coverage" NAME="groq_client Coverage Results" MODIFIED="1774796828176" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/nlp" />
     <SUITE FILE_PATH="coverage/dt_construction$engine.coverage" NAME="engine Coverage Results" MODIFIED="1775040054877" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/core" />
-    <SUITE FILE_PATH="coverage/dt_construction$database.coverage" NAME="database Coverage Results" MODIFIED="1775641040781" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/db" />
-    <SUITE FILE_PATH="coverage/dt_construction$main.coverage" NAME="main Coverage Results" MODIFIED="1775652187471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
+    <SUITE FILE_PATH="coverage/dt_construction$database.coverage" NAME="database Coverage Results" MODIFIED="1775890908576" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/db" />
+    <SUITE FILE_PATH="coverage/dt_construction$main.coverage" NAME="main Coverage Results" MODIFIED="1776196384386" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
   </component>
 </project>

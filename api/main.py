@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from core.engine import DigitalTwinEngine
 from api.project_creator import router as creator_router
+from api.meeting_mailer import router as mailer_router
 
 app = FastAPI(
     title="Digital Twin - Construction Management",
@@ -13,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origin_regex=r"http://localhost:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -21,6 +22,7 @@ app.add_middleware(
 
 # Mount the project-creator sub-router (no extra prefix – routes are /projects/…)
 app.include_router(creator_router)
+app.include_router(mailer_router)
 
 engine = DigitalTwinEngine()
 

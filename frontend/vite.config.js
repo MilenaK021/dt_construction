@@ -8,7 +8,19 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.log('[proxy error]', err.message)
+          })
+          proxy.on('proxyReq', (_, req) => {
+            console.log('[proxy →]', req.method, req.url)
+          })
+          proxy.on('proxyRes', (res, req) => {
+            console.log('[proxy ←]', res.statusCode, req.url)
+          })
+        }
       }
     }
   }
