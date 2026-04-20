@@ -1,16 +1,16 @@
 import { useState } from 'react'
+import ProjectDashboard from './ProjectDashboard'
 import TaskList from './TaskList'
 import MeetingInvitation from './MeetingInvitation'
-import ReportForm from './ReportForm'
 import './ProjectDetail.css'
 
 export default function ProjectDetail({ project, onBack }) {
-  const [activeTab, setActiveTab] = useState('tasks')
+  const [activeTab, setActiveTab] = useState('dashboard')
 
   const tabs = [
-    { id: 'tasks',    label: 'Tasks' },
-    { id: 'meeting',  label: 'Meeting Invitation' },
-    { id: 'report',   label: 'Submit Report' },
+    { id: 'dashboard', label: '📊 Dashboard' },
+    { id: 'tasks',     label: '✅ Tasks' },
+    { id: 'meeting',   label: '📅 Meeting Invitation' },
   ]
 
   return (
@@ -31,9 +31,9 @@ export default function ProjectDetail({ project, onBack }) {
       </div>
 
       <div className="tab-content">
-        {activeTab === 'tasks'   && <TaskList projectId={project.id} />}
-        {activeTab === 'meeting' && <MeetingInvitation projectId={project.id} />}
-        {activeTab === 'report'  && <ReportForm projectId={project.id} />}
+        {activeTab === 'dashboard' && <ProjectDashboard projectId={project.id} />}
+        {activeTab === 'tasks'     && <TaskList projectId={project.id} />}
+        {activeTab === 'meeting'   && <MeetingInvitation projectId={project.id} />}
       </div>
     </div>
   )

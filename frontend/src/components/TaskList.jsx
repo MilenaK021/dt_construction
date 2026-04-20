@@ -3,12 +3,12 @@ import { getTasks } from '../api'
 import './TaskList.css'
 
 const STATE_META = {
-  '1_planned':            { label: 'Planned', color: '#ffc82b' },
+  '1_planned':            { label: 'Planned', color: '#185FA5' },
   '01_in_progress':       { label: 'In Progress', color: '#E65100' },
   '1_in_progress':        { label: 'In Progress', color: '#E65100' },
   '1_done':               { label: 'Done',        color: '#2E7D32' },
   '03_approved':          { label: 'Approved',    color: '#2E7D32' },
-  '04_waiting_normal':    { label: 'Waiting',     color: '#185FA5' },
+  '04_waiting_normal':    { label: 'Waiting',     color: '#cdb50f' },
   '02_changes_requested': { label: 'Needs Review',color: '#C62828' },
 }
 
@@ -25,9 +25,9 @@ function resolveStatus(task) {
   if (s.includes('block') || s.includes('заблок'))
     return { label: stage, color: '#C62828' }
   if (s.includes('planned') || s.includes('план'))
-    return { label: stage, color: '#ffc82b' }
-  if (s.includes('wait') || s.includes('ожид'))
     return { label: stage, color: '#185FA5' }
+  if (s.includes('wait') || s.includes('ожид'))
+    return { label: stage, color: '#cdb50f' }
 
   return { label: stage || 'New', color: '#888' }
 }

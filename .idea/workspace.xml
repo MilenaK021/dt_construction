@@ -4,15 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="task status refresh">
+    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="task status refresh, email, debugging">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/MeetingInvitation.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectList.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectList.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectDetail.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/TaskList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/TaskList.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +92,7 @@
       <workItem from="1774613206022" duration="2297000" />
       <workItem from="1774703896704" duration="17503000" />
       <workItem from="1776238121802" duration="11098000" />
-      <workItem from="1776361296676" duration="1745000" />
+      <workItem from="1776361296676" duration="8075000" />
     </task>
     <task id="LOCAL-00001" summary="wouwo">
       <option name="closed" value="true" />
@@ -123,7 +118,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775890153336</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="task status refresh, email, debugging">
+      <option name="closed" value="true" />
+      <created>1776372743982</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1776372743982</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -133,7 +136,8 @@
     <MESSAGE value="wouwo" />
     <MESSAGE value="wouwoj" />
     <MESSAGE value="task status refresh" />
-    <option name="LAST_COMMIT_MESSAGE" value="task status refresh" />
+    <MESSAGE value="task status refresh, email, debugging" />
+    <option name="LAST_COMMIT_MESSAGE" value="task status refresh, email, debugging" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/dt_construction$_project_creator.coverage" NAME=" project_creator Coverage Results" MODIFIED="1775641279433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
