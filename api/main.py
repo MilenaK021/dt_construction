@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from core.engine import DigitalTwinEngine
 from api.project_creator import router as creator_router
 from api.meeting_mailer import router as mailer_router
+from api.deadline_alerting import router as alerting_router
 
 app = FastAPI(
     title="Digital Twin - Construction Management",
@@ -23,6 +24,7 @@ app.add_middleware(
 # Mount the project-creator sub-router (no extra prefix – routes are /projects/…)
 app.include_router(creator_router)
 app.include_router(mailer_router)
+app.include_router(alerting_router)
 
 engine = DigitalTwinEngine()
 

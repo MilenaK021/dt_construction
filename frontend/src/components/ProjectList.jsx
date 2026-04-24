@@ -1,17 +1,29 @@
 import { useEffect, useState } from 'react'
-import { getProjects } from '../api'
+import { getProjects, getDeadlineStatus } from '../api'
 import './ProjectList.css'
 
 export default function ProjectList({ onSelect }) {
   const [projects, setProjects] = useState([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState('')
+  const [overdue,  setOverdue]  = useState({})   // { [project_id]: true }
 
   useEffect(() => {
     getProjects()
-      .then(res => setProjects(res.data.projects))
+      .then(res => {
+        const ps = res.data.projects
+        setProjects(ps)
+        // Fire deadline checks for all projects in parallel — silently
+        ps.forEach(p => {
+          getDeadlineStatus(p.id)
+            .then(r => {
+              if (r.data.has_overdue)
+                setOverdue(prev => ({ ...prev, [p.id]: true }))
+            })
+            .catch(() => {})
+        })
+      })
       .catch(err => {
-        console.error(err)
         const detail = err.response?.data?.detail || err.message || 'Unknown error'
         setError(`Could not load projects: ${detail}`)
       })
@@ -40,19 +52,25 @@ export default function ProjectList({ onSelect }) {
 
   return (
     <div className="project-grid">
-      {projects.map(p => (
-        <div
-          key={p.id}
-          className="project-card"
-          onClick={() => onSelect(p)}
-        >
-          <div className="project-name">{p.name}</div>
-          <div className="project-meta">
-            {p.date_start ? `Start: ${p.date_start}` : 'No start date'}
+      {projects.map(p => {
+        const hasOverdue = overdue[p.id]
+        return (
+          <div
+            key={p.id}
+            className={`project-card ${hasOverdue ? 'project-card--overdue' : ''}`}
+            onClick={() => onSelect(p)}
+          >
+            {hasOverdue && (
+              <div className="project-overdue-badge">⚠️ Deadline missed</div>
+            )}
+            <div className="project-name">{p.name}</div>
+            <div className="project-meta">
+              {p.date_start ? `Start: ${p.date_start}` : 'No start date'}
+            </div>
+            <div className="project-open">Open →</div>
           </div>
-          <div className="project-open">Open →</div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
