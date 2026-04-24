@@ -11,7 +11,7 @@ import tempfile
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -333,22 +333,20 @@ async def create_project_from_plan(
 
 
 @router.post("/projects/confirm-plan")
-async def confirm_plan(body: dict):
+async def confirm_plan(body: dict, request: Request):
     """
     Step 2: Push the approved plan to Odoo.
     Body: { plan: {...}, project_name: "...", start_date: "..." }
     """
-    from core.engine import DigitalTwinEngine
-
     plan         = body.get("plan")
     project_name = body.get("project_name") or plan.get("project_name", "New Project")
 
     if not plan:
         raise HTTPException(status_code=400, detail="plan is required")
 
-    engine = DigitalTwinEngine()
+    odoo = request.app.state.engine.odoo
     try:
-        project_id = _push_to_odoo(engine.odoo, project_name, plan)
+        project_id = _push_to_odoo(odoo, project_name, plan)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Odoo error: {e}")
 

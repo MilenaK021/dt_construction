@@ -9,14 +9,20 @@ ODOO_DB   = os.getenv("ODOO_DB")
 ODOO_USER = os.getenv("ODOO_USER")
 ODOO_PASS = os.getenv("ODOO_PASS")
 
+
 class OdooClient:
     def __init__(self):
-        self._common = xmlrpc.client.ServerProxy(f"{ODOO_URL}/xmlrpc/2/common")
-        self._models = xmlrpc.client.ServerProxy(f"{ODOO_URL}/xmlrpc/2/object")
-        self._uid = self._common.authenticate(ODOO_DB, ODOO_USER, ODOO_PASS, {})
+        # Only authenticate once to get the uid.
+        # ServerProxy objects are created fresh per call (not thread-safe on Windows).
+        common = xmlrpc.client.ServerProxy(f"{ODOO_URL}/xmlrpc/2/common")
+        self._uid = common.authenticate(ODOO_DB, ODOO_USER, ODOO_PASS, {})
         if not self._uid:
             raise ConnectionError("ODOO authentication failed. Check your credentials.")
         print(f"Connected to ODOO as user ID: {self._uid}")
+
+    def _models(self):
+        """Return a fresh ServerProxy every call — required for thread safety on Windows."""
+        return xmlrpc.client.ServerProxy(f"{ODOO_URL}/xmlrpc/2/object")
 
     def _call(self, model, method, domain=None, fields=None, limit=100):
         kwargs = {}
@@ -24,7 +30,7 @@ class OdooClient:
             kwargs["fields"] = fields
         if limit:
             kwargs["limit"] = limit
-        return self._models.execute_kw(
+        return self._models().execute_kw(
             ODOO_DB, self._uid, ODOO_PASS,
             model, method,
             [domain or []],
@@ -62,8 +68,8 @@ class OdooClient:
         )
 
     def update_task_deadline(self, task_id, new_deadline):
-        """Push a new deadline back to ODOO."""
-        return self._models.execute_kw(
+        """Push a new deadline back to Odoo."""
+        return self._models().execute_kw(
             ODOO_DB, self._uid, ODOO_PASS,
             "project.task", "write",
             [[task_id], {"date_deadline": new_deadline}]

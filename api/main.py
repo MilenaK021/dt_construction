@@ -1,17 +1,30 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
 from pydantic import BaseModel
-from core.engine import DigitalTwinEngine
+
 from api.project_creator import router as creator_router
-from api.meeting_mailer import router as mailer_router
+from api.meeting_mailer   import router as mailer_router
 from api.deadline_alerting import router as alerting_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Runs inside the worker process AFTER the reloader forks.
+    # This is the correct place to open network connections on Windows.
+    from core.engine import DigitalTwinEngine
+    app.state.engine = DigitalTwinEngine()
+    yield
+    # Cleanup (if needed) goes here
+
 
 app = FastAPI(
     title="Digital Twin - Construction Management",
     description="AI-powered project management assistant",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
-
-from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,12 +34,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the project-creator sub-router (no extra prefix – routes are /projects/…)
 app.include_router(creator_router)
 app.include_router(mailer_router)
 app.include_router(alerting_router)
-
-engine = DigitalTwinEngine()
 
 
 # ─────────────────────────────────────────
@@ -54,18 +64,18 @@ def root():
 
 
 @app.get("/projects")
-def get_projects():
+def get_projects(request: Request):
     try:
-        projects = engine.odoo.get_projects()
+        projects = request.app.state.engine.odoo.get_projects()
         return {"projects": projects}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/projects/{project_id}")
-def get_project(project_id: int):
+def get_project(project_id: int, request: Request):
     try:
-        data = engine.load_project(project_id)
+        data = request.app.state.engine.load_project(project_id)
         return data
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -74,51 +84,51 @@ def get_project(project_id: int):
 
 
 @app.get("/projects/{project_id}/tasks")
-def get_tasks(project_id: int):
+def get_tasks(project_id: int, request: Request):
     try:
-        tasks = engine.odoo.get_tasks(project_id=project_id)
+        tasks = request.app.state.engine.odoo.get_tasks(project_id=project_id)
         return {"tasks": tasks}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/employees")
-def get_employees():
+def get_employees(request: Request):
     try:
-        employees = engine.odoo.get_employees()
+        employees = request.app.state.engine.odoo.get_employees()
         return {"employees": employees}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/projects/{project_id}/meeting-invitation")
-def meeting_invitation(project_id: int):
+def meeting_invitation(project_id: int, request: Request):
     try:
-        invitation = engine.generate_meeting_invitation(project_id)
+        invitation = request.app.state.engine.generate_meeting_invitation(project_id)
         return {"project_id": project_id, "invitation": invitation}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/ask")
-def answer_question(request: QuestionRequest):
+def answer_question(req: QuestionRequest, request: Request):
     try:
-        answer = engine.answer_employee_question(
-            question=request.question,
-            project_id=request.project_id
+        answer = request.app.state.engine.answer_employee_question(
+            question=req.question,
+            project_id=req.project_id,
         )
-        return {"question": request.question, "answer": answer}
+        return {"question": req.question, "answer": answer}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/reports/submit")
-def submit_report(request: ReportRequest):
+def submit_report(req: ReportRequest, request: Request):
     try:
-        result = engine.process_report(
-            task_id=request.task_id,
-            employee_name=request.employee_name,
-            report_text=request.report_text
+        result = request.app.state.engine.process_report(
+            task_id=req.task_id,
+            employee_name=req.employee_name,
+            report_text=req.report_text,
         )
         return result
     except Exception as e:
@@ -126,18 +136,18 @@ def submit_report(request: ReportRequest):
 
 
 @app.get("/projects/{project_id}/progress")
-def check_progress(project_id: int):
+def check_progress(project_id: int, request: Request):
     try:
-        progress = engine.check_project_progress(project_id)
+        progress = request.app.state.engine.check_project_progress(project_id)
         return progress
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/projects/{project_id}/final-report")
-def final_report(project_id: int):
+def final_report(project_id: int, request: Request):
     try:
-        report = engine.generate_final_report(project_id)
+        report = request.app.state.engine.generate_final_report(project_id)
         return {"project_id": project_id, "report": report}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
