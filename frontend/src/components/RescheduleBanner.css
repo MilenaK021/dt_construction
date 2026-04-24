@@ -1,0 +1,232 @@
+/* ── Alert banner ────────────────────────────────────────────── */
+.rsb-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: #fff7ed;
+  border: 1.5px solid #f97316;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.rsb-banner-left {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+
+.rsb-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+.rsb-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #9a3412;
+  margin-bottom: 8px;
+}
+
+.rsb-overdue-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.rsb-overdue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid #fed7aa;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: #7c2d12;
+  font-weight: 500;
+}
+
+.rsb-days-late {
+  background: #f97316;
+  color: white;
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ── Reschedule button ───────────────────────────────────────── */
+.rsb-btn {
+  background: #f97316;
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.rsb-btn:hover    { background: #ea580c; }
+.rsb-btn:disabled { background: #fdba74; cursor: not-allowed; }
+
+/* ── Error ───────────────────────────────────────────────────── */
+.rsb-error {
+  background: #fdecea;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* ── Preview box ─────────────────────────────────────────────── */
+.rsb-preview {
+  background: white;
+  border: 1px solid #e8eaf0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 4px;
+}
+
+.rsb-preview-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.rsb-preview-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.rsb-preview-sub {
+  font-size: 13px;
+  color: #888;
+}
+
+.rsb-no-changes {
+  color: #888;
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+/* ── Changes table ───────────────────────────────────────────── */
+.rsb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.rsb-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: #f4f6f9;
+  color: #666;
+  font-weight: 600;
+  border-bottom: 1px solid #e8eaf0;
+}
+
+.rsb-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f4f6f9;
+  vertical-align: middle;
+}
+
+.rsb-row-origin td {
+  background: #fff7ed;
+}
+
+.rsb-origin-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ea580c;
+  background: #ffedd5;
+  border-radius: 20px;
+  padding: 1px 7px;
+  vertical-align: middle;
+}
+
+.rsb-old-date { color: #aaa; text-decoration: line-through; }
+.rsb-arrow    { color: #ccc; font-size: 16px; padding: 0 4px; }
+.rsb-new-date { color: #185FA5; font-weight: 700; }
+
+/* ── Preview actions ─────────────────────────────────────────── */
+.rsb-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.rsb-ghost-btn {
+  background: none;
+  border: 1px solid #dde1ea;
+  color: #555;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.rsb-ghost-btn:hover    { border-color: #185FA5; color: #185FA5; }
+.rsb-ghost-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.rsb-confirm-btn {
+  background: #185FA5;
+  color: white;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.2s;
+}
+
+.rsb-confirm-btn:hover    { background: #0c447c; }
+.rsb-confirm-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+/* ── Success ─────────────────────────────────────────────────── */
+.rsb-success {
+  background: #f0fdf4;
+  border: 1.5px solid #22c55e;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #15803d;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────── */
+.rsb-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: rsb-spin 0.7s linear infinite;
+}
+
+.rsb-spinner--dark {
+  border-color: rgba(0,0,0,0.15);
+  border-top-color: white;
+}
+
+@keyframes rsb-spin { to { transform: rotate(360deg); } }
