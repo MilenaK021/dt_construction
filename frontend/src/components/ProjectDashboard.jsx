@@ -116,7 +116,10 @@ function HealthStrip({ tasks }) {
   const pct      = totalDur > 0 ? Math.round((doneDur / totalDur) * 100) : 0
 
   const deadlines  = tasks.map(t => parseDate(t.date_deadline)).filter(Boolean)
-  const allStarts  = tasks.map(t => subtractWorkingDays(parseDate(t.date_deadline), t.duration_days || 5)).filter(Boolean)
+  // Use date_assign (real start pushed to Odoo) if available, else compute backwards
+  const allStarts  = tasks.map(t =>
+    parseDate(t.date_assign) || subtractWorkingDays(parseDate(t.date_deadline), t.duration_days || 5)
+  ).filter(Boolean)
   const firstStart = allStarts.length  ? new Date(Math.min(...allStarts)) : null
   const lastDL     = deadlines.length  ? new Date(Math.max(...deadlines)) : null
   const daysLeft   = lastDL ? Math.ceil((lastDL - new Date()) / 86400000) : null

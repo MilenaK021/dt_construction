@@ -47,7 +47,7 @@ class OdooClient:
 
     def get_tasks(self, project_id=None):
         domain = [["project_id", "=", project_id]] if project_id else []
-        return self._call(
+        tasks  = self._call(
             "project.task",
             "search_read",
             domain=domain,
@@ -55,9 +55,18 @@ class OdooClient:
                 "id", "name", "project_id",
                 "date_deadline", "progress",
                 "user_ids", "stage_id",
-                "depend_on_ids", "description"
+                "depend_on_ids", "description", "date_assign"
             ]
         )
+        # Parse duration_days from description field where we stored it as [duration:N]
+        import re
+        for t in tasks:
+            desc = t.get("description") or ""
+            m    = re.search(r"\[duration:(\d+)\]", desc)
+            t["duration_days"] = int(m.group(1)) if m else 5
+            # Clean display description (remove the tag)
+            t["description"] = re.sub(r"\[duration:\d+\]\s*", "", desc).strip()
+        return tasks
 
     def get_employees(self):
         return self._call(

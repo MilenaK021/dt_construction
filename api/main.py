@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from api.project_creator import router as creator_router
 from api.meeting_mailer   import router as mailer_router
 from api.deadline_alerting import router as alerting_router
+from api.avatar_chat import router as avatar_router
 
 
 @asynccontextmanager
@@ -37,6 +38,7 @@ app.add_middleware(
 app.include_router(creator_router)
 app.include_router(mailer_router)
 app.include_router(alerting_router)
+app.include_router(avatar_router)
 
 
 # ─────────────────────────────────────────

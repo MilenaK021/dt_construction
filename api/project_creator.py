@@ -218,7 +218,7 @@ def _parse_plan_with_llm(doc_text: str, project_name: str, start_date: str) -> d
 PIPELINE_STAGES = ["New", "Planned", "In Progress", "Done", "Cancelled"]
 
 
-def _ensure_pipeline_stages(models, db, uid, pwd, project_id: int) -> dict:
+def _ensure_pipeline_stages(odoo_client, db, uid, pwd, project_id: int) -> dict:
     """
     Make sure all 5 pipeline stages exist globally and are linked to this project.
     Returns a dict: { "New": id, "Planned": id, ... }
@@ -226,7 +226,7 @@ def _ensure_pipeline_stages(models, db, uid, pwd, project_id: int) -> dict:
     stage_ids = {}
     for i, stage_name in enumerate(PIPELINE_STAGES):
         # Look for any existing global stage with this name
-        existing = models.execute_kw(
+        existing = odoo_client._models().execute_kw(
             db, uid, pwd,
             "project.task.type", "search_read",
             [[["name", "=", stage_name]]],
@@ -236,13 +236,13 @@ def _ensure_pipeline_stages(models, db, uid, pwd, project_id: int) -> dict:
             sid = existing[0]["id"]
         else:
             # Create it globally (no project_ids yet — we link below)
-            sid = models.execute_kw(
+            sid = odoo_client._models().execute_kw(
                 db, uid, pwd,
                 "project.task.type", "create",
                 [{"name": stage_name, "sequence": (i + 1) * 10}]
             )
         # Link stage to this project (many2many link, safe to call even if already linked)
-        models.execute_kw(
+        odoo_client._models().execute_kw(
             db, uid, pwd,
             "project.task.type", "write",
             [[sid], {"project_ids": [(4, project_id)]}]
@@ -253,13 +253,12 @@ def _ensure_pipeline_stages(models, db, uid, pwd, project_id: int) -> dict:
 
 def _push_to_odoo(odoo_client, project_name: str, plan: dict) -> int:
     """Create project + tasks in Odoo. Returns new project id."""
-    models = odoo_client._models
     uid    = odoo_client._uid
     pwd    = __import__("os").getenv("ODOO_PASS")
     db     = __import__("os").getenv("ODOO_DB")
 
     # Create the project
-    project_id = models.execute_kw(
+    project_id = odoo_client._models().execute_kw(
         db, uid, pwd,
         "project.project", "create",
         [{"name": project_name,
@@ -267,17 +266,23 @@ def _push_to_odoo(odoo_client, project_name: str, plan: dict) -> int:
     )
 
     # Ensure all pipeline stages exist globally and are linked to this project.
-    # All new tasks start in "New".
-    stage_map = _ensure_pipeline_stages(models, db, uid, pwd, project_id)
+    stage_map    = _ensure_pipeline_stages(odoo_client, db, uid, pwd, project_id)
     new_stage_id = stage_map["New"]
 
-    # Create tasks — name format: "1.1 Подготовительный этап"
+    # Pass 1: create tasks without dependencies, store plan_id → odoo_id mapping
+    plan_id_to_odoo_id = {}   # plan internal id → real Odoo task id
+
     for t in plan["tasks"]:
         section   = t.get("section", "")
         name_ru   = t.get("name_ru") or t.get("name") or ""
         full_name = f"{section} {name_ru}".strip() if section else name_ru
 
-        models.execute_kw(
+        # Store assignees AND duration in description so we can read them back later
+        dur         = t.get("duration_days", 5)
+        assignees   = t.get("assignees", [])
+        description = f"[duration:{dur}] " + ", ".join(assignees)
+
+        odoo_id = odoo_client._models().execute_kw(
             db, uid, pwd,
             "project.task", "create",
             [{
@@ -285,8 +290,28 @@ def _push_to_odoo(odoo_client, project_name: str, plan: dict) -> int:
                 "project_id":    project_id,
                 "stage_id":      new_stage_id,
                 "date_deadline": t.get("deadline"),
-                "description":   ", ".join(t.get("assignees", [])),
+                "date_assign":   t.get("start_date"),
+                "description":   description,
             }]
+        )
+        plan_id_to_odoo_id[t["id"]] = odoo_id
+
+    # Pass 2: set depend_on_ids using real Odoo task IDs
+    for t in plan["tasks"]:
+        depends_on = t.get("depends_on") or t.get("depend_on", [])
+        if not depends_on:
+            continue
+        odoo_dep_ids = [
+            plan_id_to_odoo_id[dep_id]
+            for dep_id in depends_on
+            if dep_id in plan_id_to_odoo_id
+        ]
+        if not odoo_dep_ids:
+            continue
+        odoo_client._models().execute_kw(
+            db, uid, pwd,
+            "project.task", "write",
+            [[plan_id_to_odoo_id[t["id"]]], {"depend_on_ids": [(6, 0, odoo_dep_ids)]}]
         )
 
     return project_id

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ProjectDashboard from './ProjectDashboard'
 import TaskList from './TaskList'
 import MeetingInvitation from './MeetingInvitation'
+import AvatarChat from './AvatarChat'
 import './ProjectDetail.css'
 
 export default function ProjectDetail({ project, onBack }) {
@@ -11,6 +12,7 @@ export default function ProjectDetail({ project, onBack }) {
     { id: 'dashboard', label: '📊 Dashboard' },
     { id: 'tasks',     label: '✅ Tasks' },
     { id: 'meeting',   label: '📅 Meeting Invitation' },
+    { id: 'avatar',    label: '🤖 Try AI Manager' },
   ]
 
   return (
@@ -34,6 +36,12 @@ export default function ProjectDetail({ project, onBack }) {
         {activeTab === 'dashboard' && <ProjectDashboard projectId={project.id} />}
         {activeTab === 'tasks'     && <TaskList projectId={project.id} />}
         {activeTab === 'meeting'   && <MeetingInvitation projectId={project.id} />}
+        {activeTab === 'avatar'    && (
+          <AvatarChat
+            projectId={project.id}
+            projectName={project.name}
+          />
+        )}
       </div>
     </div>
   )

@@ -39,9 +39,8 @@ export default function RescheduleBanner({ projectId }) {
       await confirmReschedule(projectId, { changes: preview.changes })
       setDone(true)
       setPreview(null)
-      // Re-check status
-      const r = await getDeadlineStatus(projectId)
-      setStatus(r.data)
+      // Short delay so the user sees the success state, then reload
+      setTimeout(() => window.location.reload(), 1500)
     } catch (e) {
       setError(e.response?.data?.detail || 'Failed to push changes to Odoo')
     } finally {

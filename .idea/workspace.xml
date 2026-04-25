@@ -4,12 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="deadline reschedule 3">
+    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="deadline reschedule 4">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/deadline_alerting.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/deadline_alerting.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/project_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/project_creator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/odoo_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/odoo_client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectDetail.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectList.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectList.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/RescheduleBanner.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/RescheduleBanner.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +100,7 @@
       <workItem from="1774613206022" duration="2297000" />
       <workItem from="1774703896704" duration="17503000" />
       <workItem from="1776238121802" duration="11098000" />
-      <workItem from="1776361296676" duration="15112000" />
+      <workItem from="1776361296676" duration="22778000" />
     </task>
     <task id="LOCAL-00001" summary="wouwo">
       <option name="closed" value="true" />
@@ -160,7 +166,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777047557689</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="deadline reschedule 4">
+      <option name="closed" value="true" />
+      <created>1777049922186</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1777049922186</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -175,7 +189,8 @@
     <MESSAGE value="deadline reschedule" />
     <MESSAGE value="deadline reschedule 2" />
     <MESSAGE value="deadline reschedule 3" />
-    <option name="LAST_COMMIT_MESSAGE" value="deadline reschedule 3" />
+    <MESSAGE value="deadline reschedule 4" />
+    <option name="LAST_COMMIT_MESSAGE" value="deadline reschedule 4" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/dt_construction$_project_creator.coverage" NAME=" project_creator Coverage Results" MODIFIED="1775641279433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />
