@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { avatarChat, avatarEndSession } from '../api'
+import SimliAvatar from './SimliAvatar'
 import './AvatarChat.css'
 
 const AVATAR = {
-  name:     'Алексей Громов',
+  name:     'Алексей',
   title:    'Руководитель проектного отдела',
   initials: 'АГ',
 }
@@ -16,133 +17,130 @@ const SUGGESTIONS = [
   'Что нужно сделать в первую очередь?',
 ]
 
-// ── Speech synthesis ─────────────────────────────────────────
-function useSpeech() {
-  const [speaking,  setSpeaking]  = useState(false)
-  const [muted,     setMuted]     = useState(false)
-  const utterRef = useRef(null)
+// ── Convert text to PCM audio via Web Speech + AudioContext ──
+async function textToPCM(text, onChunk) {
+  return new Promise((resolve) => {
+    if (!window.speechSynthesis) { resolve(); return }
 
-  const speak = useCallback((text) => {
-    if (muted || !window.speechSynthesis) return
-    window.speechSynthesis.cancel()
-
-    const utt  = new SpeechSynthesisUtterance(text)
-    utterRef.current = utt
-
-    // Pick a Russian voice if available, else first available
+    const utt   = new SpeechSynthesisUtterance(text)
     const voices = window.speechSynthesis.getVoices()
     const ruVoice = voices.find(v => v.lang.startsWith('ru'))
       || voices.find(v => v.lang.startsWith('en'))
       || voices[0]
     if (ruVoice) utt.voice = ruVoice
+    utt.rate  = 0.92
+    utt.pitch = 0.88
 
-    utt.rate   = 0.95
-    utt.pitch  = 0.9
-    utt.volume = 1
+    // We use AudioContext to capture the audio output and
+    // send PCM chunks to Simli while speech plays
+    const AudioCtx = window.AudioContext || window.webkitAudioContext
+    if (!AudioCtx) {
+      // fallback: just play with speechSynthesis, no Simli audio
+      utt.onend = resolve
+      window.speechSynthesis.speak(utt)
+      return
+    }
 
-    utt.onstart = () => setSpeaking(true)
-    utt.onend   = () => setSpeaking(false)
-    utt.onerror = () => setSpeaking(false)
+    const ctx        = new AudioCtx({ sampleRate: 16000 })
+    const dest       = ctx.createMediaStreamDestination()
+    const source     = ctx.createMediaStreamSource(dest.stream)
+    const processor  = ctx.createScriptProcessor(4096, 1, 1)
+
+    processor.onaudioprocess = (e) => {
+      const samples = e.inputBuffer.getChannelData(0)
+      onChunk?.(new Float32Array(samples))
+    }
+
+    source.connect(processor)
+    processor.connect(ctx.destination)
+
+    utt.onend = () => {
+      processor.disconnect()
+      source.disconnect()
+      ctx.close()
+      resolve()
+    }
+    utt.onerror = resolve
 
     window.speechSynthesis.speak(utt)
-  }, [muted])
-
-  const stop = useCallback(() => {
-    window.speechSynthesis?.cancel()
-    setSpeaking(false)
-  }, [])
-
-  const toggleMute = useCallback(() => {
-    if (!muted) stop()
-    setMuted(m => !m)
-  }, [muted, stop])
-
-  // Stop on unmount
-  useEffect(() => () => window.speechSynthesis?.cancel(), [])
-
-  return { speaking, muted, speak, stop, toggleMute }
-}
-
-// ── Typewriter effect ─────────────────────────────────────────
-function useTypewriter() {
-  const [displayed, setDisplayed] = useState('')
-  const [typing,    setTyping]    = useState(false)
-  const timerRef = useRef(null)
-
-  const type = useCallback((text, onDone) => {
-    clearInterval(timerRef.current)
-    setDisplayed('')
-    setTyping(true)
-    let i = 0
-    timerRef.current = setInterval(() => {
-      i++
-      setDisplayed(text.slice(0, i))
-      if (i >= text.length) {
-        clearInterval(timerRef.current)
-        setTyping(false)
-        onDone?.()
-      }
-    }, 18)
-  }, [])
-
-  useEffect(() => () => clearInterval(timerRef.current), [])
-
-  return { displayed, typing, type }
+  })
 }
 
 export default function AvatarChat({ projectId, projectName }) {
-  const [history,   setHistory]   = useState([])
-  const [input,     setInput]     = useState('')
-  const [loading,   setLoading]   = useState(false)
-  const [ending,    setEnding]    = useState(false)
-  const [ended,     setEnded]     = useState(false)
-  const [reportUrl, setReportUrl] = useState(null)
-  const [error,     setError]     = useState('')
-  // latest assistant message shown with typewriter
-  const [liveText,  setLiveText]  = useState('')
+  const [history,    setHistory]    = useState([])
+  const [input,      setInput]      = useState('')
+  const [loading,    setLoading]    = useState(false)
+  const [speaking,   setSpeaking]   = useState(false)
+  const [simliReady, setSimliReady] = useState(false)
+  const [simliOn,    setSimliOn]    = useState(false)
+  const [ending,     setEnding]     = useState(false)
+  const [ended,      setEnded]      = useState(false)
+  const [reportUrl,  setReportUrl]  = useState(null)
+  const [error,      setError]      = useState('')
+  const [liveText,   setLiveText]   = useState('')
 
-  const bottomRef = useRef()
-  const inputRef  = useRef()
-  const { speaking, muted, speak, stop, toggleMute } = useSpeech()
-  const { displayed, typing, type } = useTypewriter()
+  const bottomRef   = useRef()
+  const inputRef    = useRef()
+  const simliRef    = useRef()
+  const sendAudioFn = useRef(null)   // set when Simli is ready
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [history, loading, displayed])
+  }, [history, loading, liveText])
 
-  // Greeting on mount
+  // Greeting
   useEffect(() => {
-    const greeting = `Здравствуйте! Я Алексей Громов, руководитель проектного отдела. `
-      + `Готов обсудить текущее состояние проекта «${projectName || projectId}». `
-      + `Чем могу помочь?`
+    const greeting = `Здравствуйте! Я Алексей, руководитель проектного отдела. `
+      + `Готов обсудить проект «${projectName || projectId}». Чем могу помочь?`
     setHistory([{ role: 'assistant', content: greeting }])
-    // Speak greeting after voices load
-    const t = setTimeout(() => speak(greeting), 600)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, projectName])
+
+  const handleSimliReady = useCallback((getSendAudio) => {
+    sendAudioFn.current = getSendAudio()
+    setSimliReady(true)
   }, [])
 
-  const deliverReply = useCallback((reply, newHistory) => {
-    setLiveText(reply)
-    // Typewriter runs in parallel with speech
-    speak(reply)
-    type(reply, () => {
-      // When typewriter finishes, commit full history
-      setHistory(newHistory)
-      setLiveText('')
-    })
-  }, [speak, type])
+  const speak = useCallback(async (text) => {
+    setSpeaking(true)
+    // Typewriter
+    let i = 0
+    const interval = setInterval(() => {
+      i++
+      setLiveText(text.slice(0, i))
+      if (i >= text.length) clearInterval(interval)
+    }, 16)
+
+    // If Simli is connected, stream PCM to it
+    if (sendAudioFn.current) {
+      await textToPCM(text, (chunk) => sendAudioFn.current?.(chunk))
+    } else {
+      // Fallback: browser TTS only
+      await new Promise(resolve => {
+        const utt = new SpeechSynthesisUtterance(text)
+        const voices = window.speechSynthesis.getVoices()
+        const v = voices.find(v => v.lang.startsWith('ru')) || voices[0]
+        if (v) utt.voice = v
+        utt.rate = 0.92
+        utt.onend = resolve
+        utt.onerror = resolve
+        window.speechSynthesis.speak(utt)
+      })
+    }
+
+    clearInterval(interval)
+    setLiveText('')
+    setSpeaking(false)
+  }, [])
 
   const send = async (text) => {
     const msg = (text || input).trim()
-    if (!msg || loading || ended || typing) return
+    if (!msg || loading || speaking) return
     setInput('')
     setError('')
     setLoading(true)
-    stop()
+    window.speechSynthesis?.cancel()
 
-    const optimisticHistory = [...history, { role: 'user', content: msg }]
-    setHistory(optimisticHistory)
+    setHistory(prev => [...prev, { role: 'user', content: msg }])
 
     try {
       const res = await avatarChat({
@@ -152,23 +150,32 @@ export default function AvatarChat({ projectId, projectName }) {
         history,
       })
       setLoading(false)
-      deliverReply(res.data.reply, res.data.history)
+      const reply = res.data.reply
+      setHistory(res.data.history)
+      await speak(reply)
     } catch (e) {
       setLoading(false)
       setError(e.response?.data?.detail || 'Failed to get response.')
-      setHistory(history)
     } finally {
       inputRef.current?.focus()
     }
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
+  const toggleSimli = async () => {
+    if (!simliOn) {
+      setSimliOn(true)
+      simliRef.current?.start()
+    } else {
+      simliRef.current?.stop()
+      setSimliOn(false)
+      setSimliReady(false)
+      sendAudioFn.current = null
+    }
   }
 
   const endSession = async () => {
     if (history.length < 2) return
-    stop()
+    window.speechSynthesis?.cancel()
     setEnding(true)
     try {
       const res = await avatarEndSession({
@@ -186,28 +193,25 @@ export default function AvatarChat({ projectId, projectName }) {
   }
 
   const restart = () => {
-    stop()
+    window.speechSynthesis?.cancel()
+    simliRef.current?.stop()
+    setSimliOn(false)
+    setSimliReady(false)
+    sendAudioFn.current = null
     const greeting = `Готов к новой беседе о проекте «${projectName || projectId}». Чем могу помочь?`
     setHistory([{ role: 'assistant', content: greeting }])
     setEnded(false)
     setReportUrl(null)
     setLiveText('')
     setError('')
-    setTimeout(() => speak(greeting), 200)
   }
 
-  // Messages to display: committed history + live typewriter for latest reply
-  const displayHistory = liveText
-    ? [...history, { role: 'assistant', content: displayed, live: true }]
-    : history
-
-  const isBusy = loading || typing
+  const isBusy = loading || speaking
 
   return (
     <div className="ac-root">
       {/* ── Header ── */}
       <div className="ac-header">
-        {/* Avatar with speaking ring */}
         <div className={`ac-avatar-wrap ${speaking ? 'ac-speaking' : ''}`}>
           <div className="ac-avatar-circle">
             <span className="ac-avatar-initials">{AVATAR.initials}</span>
@@ -229,8 +233,10 @@ export default function AvatarChat({ projectId, projectName }) {
                 <span className="ac-status-dot ac-status-dot--pulse" />
                 Говорит…
               </span>
-            ) : typing ? (
-              <span className="ac-status-typing">Печатает…</span>
+            ) : loading ? (
+              <span className="ac-status-typing">Думает…</span>
+            ) : simliReady ? (
+              <span className="ac-status-live">🔴 Видео подключено</span>
             ) : (
               <span className="ac-status-idle">
                 <span className="ac-status-dot" />
@@ -241,13 +247,13 @@ export default function AvatarChat({ projectId, projectName }) {
         </div>
 
         <div className="ac-header-right">
-          {/* Mute toggle */}
+          {/* Simli toggle */}
           <button
-            className={`ac-mute-btn ${muted ? 'ac-mute-btn--muted' : ''}`}
-            onClick={toggleMute}
-            title={muted ? 'Включить звук' : 'Выключить звук'}
+            className={`ac-simli-btn ${simliOn ? 'ac-simli-btn--on' : ''}`}
+            onClick={toggleSimli}
+            title={simliOn ? 'Отключить видео' : 'Включить видео-аватар'}
           >
-            {muted ? '🔇' : '🔊'}
+            {simliOn ? '📹 Видео вкл.' : '📹 Включить видео'}
           </button>
 
           {!ended && history.length > 1 && (
@@ -257,12 +263,28 @@ export default function AvatarChat({ projectId, projectName }) {
               disabled={ending || isBusy}
             >
               {ending
-                ? <><span className="ac-spinner" /> Генерация…</>
+                ? <><span className="ac-spinner" />Генерация…</>
                 : '📄 Завершить сессию'}
             </button>
           )}
         </div>
       </div>
+
+      {/* ── Simli video panel (shown when toggled on) ── */}
+      {simliOn && (
+        <div className="ac-video-panel">
+          <SimliAvatar
+            ref={simliRef}
+            onReady={handleSimliReady}
+            onDisconnected={() => { setSimliReady(false); sendAudioFn.current = null }}
+          />
+          {!simliReady && (
+            <div className="ac-video-hint">
+              Подключение к видео-аватару…
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Ended ── */}
       {ended && (
@@ -284,21 +306,30 @@ export default function AvatarChat({ projectId, projectName }) {
       {!ended && (
         <>
           <div className="ac-messages">
-            {displayHistory.map((msg, i) => (
+            {history.map((msg, i) => (
               <div key={i} className={`ac-msg ac-msg--${msg.role}`}>
                 {msg.role === 'assistant' && (
-                  <div className={`ac-msg-avatar ${msg.live && speaking ? 'ac-msg-avatar--pulse' : ''}`}>
+                  <div className={`ac-msg-avatar ${speaking && i === history.length - 1 ? 'ac-msg-avatar--pulse' : ''}`}>
                     {AVATAR.initials}
                   </div>
                 )}
-                <div className={`ac-msg-bubble ${msg.live ? 'ac-msg-bubble--live' : ''}`}>
-                  {msg.live ? displayed : msg.content}
-                  {msg.live && <span className="ac-cursor" />}
-                </div>
+                <div className="ac-msg-bubble">{msg.content}</div>
               </div>
             ))}
 
-            {loading && (
+            {/* Live typewriter for current reply */}
+            {liveText && (
+              <div className="ac-msg ac-msg--assistant">
+                <div className="ac-msg-avatar ac-msg-avatar--pulse">
+                  {AVATAR.initials}
+                </div>
+                <div className="ac-msg-bubble ac-msg-bubble--live">
+                  {liveText}<span className="ac-cursor" />
+                </div>
+              </div>
+            )}
+
+            {loading && !liveText && (
               <div className="ac-msg ac-msg--assistant">
                 <div className="ac-msg-avatar">{AVATAR.initials}</div>
                 <div className="ac-msg-bubble ac-msg-bubble--typing">
@@ -310,16 +341,11 @@ export default function AvatarChat({ projectId, projectName }) {
             <div ref={bottomRef} />
           </div>
 
-          {/* Suggestions */}
           {history.length === 1 && !loading && (
             <div className="ac-suggestions">
               {SUGGESTIONS.map((s, i) => (
-                <button
-                  key={i}
-                  className="ac-suggestion-chip"
-                  onClick={() => send(s)}
-                  disabled={isBusy}
-                >
+                <button key={i} className="ac-suggestion-chip"
+                  onClick={() => send(s)} disabled={isBusy}>
                   {s}
                 </button>
               ))}
@@ -335,17 +361,12 @@ export default function AvatarChat({ projectId, projectName }) {
               placeholder="Задайте вопрос о проекте…"
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={e => { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()} }}
               rows={1}
               disabled={isBusy}
             />
-            <button
-              className="ac-send-btn"
-              onClick={() => send()}
-              disabled={isBusy || !input.trim()}
-            >
-              ➤
-            </button>
+            <button className="ac-send-btn" onClick={() => send()}
+              disabled={isBusy || !input.trim()}>➤</button>
           </div>
           <div className="ac-input-hint">Enter — отправить · Shift+Enter — новая строка</div>
         </>

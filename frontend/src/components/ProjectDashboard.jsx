@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import RescheduleBanner from './RescheduleBanner'
-import { getTasks } from '../api'
+import { getTasks, getMeetingHistory } from '../api'
 import './ProjectDashboard.css'
 
 // ── Stage config ────────────────────────────────────────────
@@ -246,28 +246,74 @@ function StageChart({ tasks }) {
   )
 }
 
-function MeetingsPanel() {
+function MeetingsPanel({ projectId }) {
+  const [events,  setEvents]  = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getMeetingHistory(projectId)
+      .then(r => setEvents(r.data.events))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [projectId])
+
+  const typeLabel = (type) => {
+    if (type === 'invitation')    return 'Meeting invitation'
+    if (type === 'avatar_session') return 'AI Manager session'
+    return type
+  }
+
+  const typeColor = (type) => {
+    if (type === 'invitation')    return '#185FA5'
+    if (type === 'avatar_session') return '#8b5cf6'
+    return '#34d399'
+  }
+
   return (
     <div className="db-section db-panel">
       <div className="db-section-header">
         <span className="db-section-title">Meeting History</span>
-        <span className="db-coming-soon">coming soon</span>
+        {events.length === 0 && !loading && (
+          <span className="db-coming-soon">no events yet</span>
+        )}
       </div>
-      <div className="db-meeting-list">
-        {FAKE_MEETINGS.map(m => (
-          <div key={m.id} className="db-meeting-row">
-            <div className="db-meeting-date">{formatShortDate(m.date)}</div>
-            <div className="db-meeting-body">
-              <span className="db-meeting-type">{m.type}</span>
-              <span className="db-meeting-note">{m.note}</span>
+
+      {loading && <p style={{color:'#aaa',fontSize:13}}>Loading…</p>}
+
+      {!loading && events.length === 0 && (
+        <p style={{color:'#bbb',fontSize:13,padding:'8px 0'}}>
+          Send a meeting invitation or complete an AI Manager session to see history here.
+        </p>
+      )}
+
+      {!loading && events.length > 0 && (
+        <div className="db-meeting-list">
+          {events.map((m, i) => (
+            <div key={i} className="db-meeting-row">
+              <div className="db-meeting-date">{formatShortDate(m.date)}</div>
+              <div className="db-meeting-body">
+                <span className="db-meeting-type" style={{color: typeColor(m.type)}}>
+                  {typeLabel(m.type)}
+                </span>
+                <span className="db-meeting-note">{m.note}</span>
+                {m.report_file && (
+                  <a
+                    href={`/api/avatar/report/${m.report_file}`}
+                    download
+                    className="db-meeting-report-link"
+                  >
+                    ⬇️ Download report
+                  </a>
+                )}
+              </div>
+              <div
+                className="db-meeting-dot"
+                style={{ background: typeColor(m.type) }}
+              />
             </div>
-            <div
-              className="db-meeting-dot"
-              style={{ background: new Date(m.date) > new Date() ? '#60a5fa' : '#34d399' }}
-            />
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -538,7 +584,7 @@ export default function ProjectDashboard({ projectId }) {
       <RescheduleBanner projectId={projectId} />
       <StageChart  tasks={tasks} />
       <div className="db-two-col">
-        <MeetingsPanel />
+        <MeetingsPanel projectId={projectId} />
         <DocsPanel />
       </div>
       <GanttChart tasks={tasks} />

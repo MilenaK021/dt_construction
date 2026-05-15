@@ -558,3 +558,31 @@
 }
 
 .db-tooltip-row span:first-child { color: rgba(255,255,255,0.5); }
+
+.db-meeting-report-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #185FA5;
+  text-decoration: none;
+  margin-top: 3px;
+  font-weight: 600;
+}
+
+.db-meeting-report-link:hover { text-decoration: underline; }
+
+/* ── Meeting report download link ────────────────────────── */
+.db-meeting-report-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #185FA5;
+  text-decoration: none;
+  margin-top: 4px;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.db-meeting-report-link:hover { color: #0c447c; text-decoration: underline; }

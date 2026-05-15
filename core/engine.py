@@ -208,14 +208,12 @@ Write in Russian. Be concise but professional.
         return response
 
 
-# -------------------------
-# TEST
-# -------------------------
+# test
 if __name__ == "__main__":
     engine = DigitalTwinEngine()
 
-    # Pick the first real construction project (id=4 from your ODOO output)
-    PROJECT_ID = 4
+    # PROJECT IS PICKED HERE
+    PROJECT_ID = 13
 
     print("\n========== STEP 1: LOAD PROJECT ==========")
     data = engine.load_project(PROJECT_ID)

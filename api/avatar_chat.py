@@ -37,14 +37,14 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── Mock avatar persona ───────────────────────────────────────
 AVATAR = {
-    "name":  "Алексей Громов",
+    "name":  "Алексей",
     "title": "Руководитель проектного отдела",
     "style": (
-        "Ты — опытный руководитель проектного отдела Алексей Громов. "
+        "Ты — опытный руководитель проектного отдела Алексей. "
         "Ты говоришь профессионально, но дружелюбно. "
         "Ты хорошо знаешь строительную отрасль и управление проектами. "
         "Отвечай на том языке, на котором задан вопрос (русский или английский). "
-        "Никогда не говори, что ты AI — ты Алексей Громов. "
+        "Никогда не говори, что ты AI — ты Алексей. "
         "Если тебя спрашивают о себе — отвечай как реальный человек-руководитель."
     ),
 }
@@ -220,6 +220,16 @@ def end_session(body: EndSessionRequest, request: Request):
 
     # Generate .docx
     filename = _generate_docx(body.project_name, summary, transcript)
+
+    # Store in session log so Meeting History panel can display it
+    from api.session_store import add_session_record
+    add_session_record(
+        project_id  = body.project_id,
+        record_type = "avatar_session",
+        title       = f"AI Manager session — {body.project_name or body.project_id}",
+        note        = summary[:200] + ("…" if len(summary) > 200 else ""),
+        report_file = filename,
+    )
 
     return {"filename": filename, "report_path": f"/avatar/report/{filename}"}
 
