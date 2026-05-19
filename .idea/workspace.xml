@@ -4,17 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="ai chat">
+    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="ai chat 2">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/avatar_chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/avatar_chat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/engine.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/engine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/odoo_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/odoo_client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/simli_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/simli_session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/AvatarChat.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AvatarChat.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/AvatarChat.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AvatarChat.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectDashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectDashboard.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectDashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +126,8 @@
       <workItem from="1777105858657" duration="2067000" />
       <workItem from="1777190757887" duration="13196000" />
       <workItem from="1778056108831" duration="652000" />
-      <workItem from="1778788041896" duration="3179000" />
+      <workItem from="1778788041896" duration="6172000" />
+      <workItem from="1778841578118" duration="6481000" />
     </task>
     <task id="LOCAL-00001" summary="wouwo">
       <option name="closed" value="true" />
@@ -211,7 +209,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777100092204</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="ai chat 2">
+      <option name="closed" value="true" />
+      <created>1778829013448</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1778829013448</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -239,7 +245,8 @@
     <MESSAGE value="deadline reschedule 3" />
     <MESSAGE value="deadline reschedule 4" />
     <MESSAGE value="ai chat" />
-    <option name="LAST_COMMIT_MESSAGE" value="ai chat" />
+    <MESSAGE value="ai chat 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="ai chat 2" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/dt_construction$_project_creator.coverage" NAME=" project_creator Coverage Results" MODIFIED="1775641279433" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/api" />

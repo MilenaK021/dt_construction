@@ -14,4 +14,5 @@ export const confirmReschedule    = (id, data)  => base.post(`/projects/${id}/re
 export const avatarChat           = (data)      => base.post('/avatar/chat', data)
 export const avatarEndSession     = (data)      => base.post('/avatar/end-session', data)
 export const simliStartSession    = (data)      => base.post('/simli/start-session', data)
+export const simliSdpExchange     = (data)      => base.post('/simli/sdp-exchange', data)
 export const getMeetingHistory    = (id)        => base.get(`/projects/${id}/meeting-history`)

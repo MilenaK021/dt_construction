@@ -1,23 +1,21 @@
 /**
  * SimliAvatar.jsx
- * Simli WebRTC integration with full debug logging.
+ * Uses the official simli-client npm package.
+ * Install: npm install simli-client  (run in frontend/ folder)
  */
 
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
 import { simliStartSession } from '../api'
 import './SimliAvatar.css'
 
-const SIMLI_HTTP = 'https://api.simli.ai'
-
 const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected }, ref) {
-  const [state,   setState]   = useState('idle')
-  const [error,   setError]   = useState('')
-  const [log,     setLog]     = useState([])
+  const [state,  setState]  = useState('idle')
+  const [error,  setError]  = useState('')
+  const [log,    setLog]    = useState([])
 
-  const videoRef = useRef(null)
-  const audioRef = useRef(null)
-  const pcRef    = useRef(null)
-  const dcRef    = useRef(null)
+  const videoRef  = useRef(null)
+  const audioRef  = useRef(null)
+  const clientRef = useRef(null)   // SimliClient instance
 
   const addLog = (msg) => {
     console.log('[Simli]', msg)
@@ -27,7 +25,7 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
   useImperativeHandle(ref, () => ({
     start:     () => connect(),
     stop:      () => disconnect(),
-    sendAudio: (buf) => sendAudio(buf),
+    sendAudio: (data) => sendAudio(data),
   }))
 
   useEffect(() => () => disconnect(), [])
@@ -38,123 +36,65 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
       setError('')
       setLog([])
 
-      // ── Step 1: get session token from our backend ──────────
-      addLog('1. Requesting session token…')
-      const res  = await simliStartSession({})
-      const data = res.data
-      addLog(`1. Got: ${JSON.stringify(data)}`)
+      // Step 1: get session token from our backend
+      addLog('1. Getting session token…')
+      const res   = await simliStartSession({})
+      const token = res.data.session_token
+      if (!token) throw new Error('No session token returned')
+      addLog(`2. Token received (${token.slice(0, 20)}…)`)
 
-      const sessionToken = data.session_token || data.sessionToken || ''
-      if (!sessionToken) {
-        throw new Error(`No session token in response: ${JSON.stringify(data)}`)
-      }
-      addLog(`2. Session token: ${sessionToken.slice(0, 20)}…`)
+      // Step 2: dynamically import simli-client
+      addLog('3. Loading SimliClient…')
+      const { SimliClient } = await import('simli-client')
 
-      // ── Step 2: create RTCPeerConnection ────────────────────
-      const iceServers = data.ice_servers?.length
-        ? data.ice_servers
-        : [{ urls: 'stun:stun.l.google.com:19302' }]
+      // Step 3: create and start client
+      addLog('4. Initialising SimliClient (livekit mode)…')
+      const client = new SimliClient(
+        token,
+        videoRef.current,
+        audioRef.current,
+        null,           // iceServers — null = use livekit mode
+        'info',         // log level
+        'livekit',      // transport mode — more firewall-friendly
+      )
+      clientRef.current = client
 
-      addLog(`3. Creating RTCPeerConnection with ${iceServers.length} ICE server(s)`)
-      const pc = new RTCPeerConnection({ iceServers })
-      pcRef.current = pc
-
-      // Track remote video/audio
-      pc.ontrack = (ev) => {
-        addLog(`4. Got remote track: ${ev.track.kind}`)
-        const stream = ev.streams[0] || new MediaStream([ev.track])
-        if (ev.track.kind === 'video' && videoRef.current) {
-          videoRef.current.srcObject = stream
-          addLog('4. Video stream attached')
-        }
-        if (ev.track.kind === 'audio' && audioRef.current) {
-          audioRef.current.srcObject = stream
-          addLog('4. Audio stream attached')
-        }
-      }
-
-      pc.oniceconnectionstatechange = () => {
-        addLog(`ICE state: ${pc.iceConnectionState}`)
-        if (['disconnected','failed','closed'].includes(pc.iceConnectionState)) {
-          setState('idle')
-          onDisconnected?.()
-        }
-      }
-
-      pc.onconnectionstatechange = () => {
-        addLog(`Connection state: ${pc.connectionState}`)
-        if (pc.connectionState === 'connected') {
-          setState('connected')
-        }
-      }
-
-      // ── Step 3: data channel for audio ─────────────────────
-      addLog('5. Creating audio data channel')
-      const dc = pc.createDataChannel('audio')
-      dcRef.current = dc
-
-      dc.onopen  = () => {
-        addLog('5. Data channel OPEN — avatar ready')
+      // Step 4: wire events
+      client.on('start', () => {
+        addLog('✅ Connected — avatar live!')
         setState('connected')
-        onReady?.((buf) => sendAudio(buf))
-      }
-      dc.onclose = () => addLog('5. Data channel closed')
-      dc.onerror = (e) => addLog(`5. Data channel error: ${e}`)
-
-      // Add transceiver so Simli knows to send us video+audio
-      pc.addTransceiver('video', { direction: 'recvonly' })
-      pc.addTransceiver('audio', { direction: 'sendrecv' })
-
-      // ── Step 4: create offer ────────────────────────────────
-      addLog('6. Creating SDP offer…')
-      const offer = await pc.createOffer()
-      await pc.setLocalDescription(offer)
-      addLog('6. Local description set')
-
-      // Wait for ICE gathering
-      addLog('7. Gathering ICE candidates…')
-      await new Promise(resolve => {
-        if (pc.iceGatheringState === 'complete') { resolve(); return }
-        const check = () => {
-          if (pc.iceGatheringState === 'complete') {
-            pc.removeEventListener('icegatheringstatechange', check)
-            resolve()
-          }
-        }
-        pc.addEventListener('icegatheringstatechange', check)
-        setTimeout(resolve, 5000)
-      })
-      addLog('7. ICE gathering complete')
-
-      // ── Step 5: send offer to Simli ─────────────────────────
-      addLog('8. Sending offer to Simli /startWebRTCSession…')
-      const sdpBody = {
-        sdp:           pc.localDescription.sdp,
-        type:          pc.localDescription.type,
-        session_token: sessionToken,
-      }
-      addLog(`8. Payload keys: ${Object.keys(sdpBody).join(', ')}`)
-
-      const sdpRes = await fetch(`${SIMLI_HTTP}/startWebRTCSession`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(sdpBody),
+        onReady?.((data) => sendAudio(data))
       })
 
-      const sdpText = await sdpRes.text()
-      addLog(`8. Simli response ${sdpRes.status}: ${sdpText.slice(0, 120)}`)
+      client.on('stop',  () => {
+        addLog('Connection stopped')
+        setState('idle')
+        onDisconnected?.()
+      })
 
-      if (!sdpRes.ok) {
-        throw new Error(`Simli SDP error ${sdpRes.status}: ${sdpText}`)
-      }
+      client.on('error', (e) => {
+        const msg = String(e?.message || e)
+        addLog(`ERROR: ${msg}`)
+        setError(msg)
+        setState('error')
+        onDisconnected?.()
+      })
 
-      const answer = JSON.parse(sdpText)
-      addLog(`9. Setting remote description (type: ${answer.type})`)
-      await pc.setRemoteDescription(new RTCSessionDescription(answer))
-      addLog('9. Remote description set — waiting for connection…')
+      client.on('startup_error', (msg) => {
+        addLog(`STARTUP ERROR: ${msg}`)
+        setError(msg)
+        setState('error')
+        onDisconnected?.()
+      })
+
+      client.on('speaking', () => addLog('Avatar speaking'))
+      client.on('silent',   () => addLog('Avatar silent'))
+
+      addLog('5. Starting connection…')
+      await client.start()
 
     } catch (e) {
-      const msg = e.message || String(e)
+      const msg = e?.message || String(e)
       addLog(`ERROR: ${msg}`)
       setError(msg)
       setState('error')
@@ -163,22 +103,26 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
   }
 
   function disconnect() {
-    dcRef.current?.close()
-    pcRef.current?.close()
-    pcRef.current = null
-    dcRef.current = null
+    try { clientRef.current?.stop() } catch (_) {}
+    clientRef.current = null
     setState('idle')
   }
 
-  function sendAudio(float32Array) {
-    const dc = dcRef.current
-    if (!dc || dc.readyState !== 'open') return
-    const pcm16 = new Int16Array(float32Array.length)
-    for (let i = 0; i < float32Array.length; i++) {
-      const s = Math.max(-1, Math.min(1, float32Array[i]))
-      pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff
+  function sendAudio(float32OrUint8) {
+    const client = clientRef.current
+    if (!client) return
+
+    // simli-client expects Uint8Array PCM16 at 16kHz
+    if (float32OrUint8 instanceof Float32Array) {
+      const pcm = new Int16Array(float32OrUint8.length)
+      for (let i = 0; i < float32OrUint8.length; i++) {
+        const s = Math.max(-1, Math.min(1, float32OrUint8[i]))
+        pcm[i]  = s < 0 ? s * 0x8000 : s * 0x7fff
+      }
+      client.sendAudioData(new Uint8Array(pcm.buffer))
+    } else {
+      client.sendAudioData(float32OrUint8)
     }
-    dc.send(pcm16.buffer)
   }
 
   return (
@@ -198,7 +142,6 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
             <span className="simli-spinner" />
             <span className="simli-connecting-text">Подключение…</span>
           </div>
-          {/* Debug log shown during connection */}
           <div className="simli-debug-log">
             {log.map((l, i) => <div key={i}>{l}</div>)}
           </div>

@@ -161,10 +161,10 @@ export default function AvatarChat({ projectId, projectName }) {
     }
   }
 
-  const toggleSimli = async () => {
+  const toggleSimli = () => {
     if (!simliOn) {
       setSimliOn(true)
-      simliRef.current?.start()
+      // start() is called in useEffect once SimliAvatar mounts
     } else {
       simliRef.current?.stop()
       setSimliOn(false)
@@ -205,6 +205,13 @@ export default function AvatarChat({ projectId, projectName }) {
     setLiveText('')
     setError('')
   }
+
+  // Call start() after SimliAvatar mounts (simliOn becomes true)
+  useEffect(() => {
+    if (simliOn && simliRef.current) {
+      simliRef.current.start()
+    }
+  }, [simliOn])
 
   const isBusy = loading || speaking
 

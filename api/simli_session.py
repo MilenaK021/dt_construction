@@ -1,12 +1,7 @@
 """
-simli_session.py  →  api/simli_session.py
-
-POST /simli/start-session
-     → { session_token, ice_servers }  — frontend uses this to open WebRTC
-
-POST /simli/tts-audio
-     body: { text, session_token }
-     → streams PCM audio to Simli so the avatar speaks
+simli_session.py  ->  api/simli_session.py
+Uses Simli REST API to generate session token only.
+All WebRTC is handled by simli-client npm package in the frontend.
 """
 
 import os
@@ -28,46 +23,49 @@ class StartSessionRequest(BaseModel):
     face_id: str = ""
 
 
-class TTSRequest(BaseModel):
-    text:          str
-    session_token: str
-
-
 @router.post("/simli/start-session")
 async def start_session(body: StartSessionRequest):
     """
-    Ask Simli to create a new WebRTC session.
-    Returns the session_token the frontend needs to connect.
+    Generate a Simli session token using their official API format.
+    Frontend uses this token with the simli-client npm package.
     """
     face_id = body.face_id or SIMLI_FACE_ID
 
     if not SIMLI_API_KEY:
         raise HTTPException(status_code=500, detail="SIMLI_API_KEY not set in .env")
 
+    # Official Simli token generation payload per their JS SDK docs
     payload = {
-        "faceId":          face_id,
-        "isJPG":           True,
-        "syncAudio":       True,
-        "apiKey":          SIMLI_API_KEY,
+        "config": {
+            "faceId":           face_id,
+            "handleSilence":    True,
+            "maxSessionLength": 600,
+            "maxIdleTime":      180,
+        },
+        "apiKey": SIMLI_API_KEY,
     }
 
     try:
-        async with httpx.AsyncClient(timeout=15) as client:
+        async with httpx.AsyncClient(timeout=20) as client:
             r = await client.post(
-                f"{SIMLI_BASE}/startAudioToVideoSession",
+                f"{SIMLI_BASE}/getSessionToken",
                 json=payload,
+                headers={"Content-Type": "application/json"},
             )
-        if r.status_code != 200:
-            raise HTTPException(
-                status_code=502,
-                detail=f"Simli error {r.status_code}: {r.text[:300]}"
-            )
-        data = r.json()
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=502, detail=f"Could not reach Simli: {e}")
+        try:
+            data = r.json()
+        except Exception:
+            data = {"raw_text": r.text}
 
-    return {
-        "session_token": data.get("session_token") or data.get("sessionToken", ""),
-        "ice_servers":   data.get("iceServers", []),
-        "face_id":       face_id,
-    }
+        if r.status_code != 200:
+            raise HTTPException(status_code=502,
+                detail=f"Simli {r.status_code}: {r.text[:400]}")
+
+        return {
+            "session_token": data.get("session_token", ""),
+            "face_id":       face_id,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
