@@ -1,138 +1,213 @@
+/* ProjectList.css */
+
+/* ── Stats strip ─────────────────────────────────── */
+.pl-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pl-stat {
+  background: #fff;
+  border: 1px solid #e4e8ef;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.pl-stat-label {
+  font-size: 11px;
+  color: #8896ab;
+  font-weight: 500;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.pl-stat-val {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a2535;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.pl-stat-val--red   { color: #ef4444; }
+.pl-stat-val--green { color: #22c55e; }
+.pl-stat-val--blue  { color: #3b82f6; }
+
+/* ── Project grid ────────────────────────────────── */
 .project-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 12px;
 }
 
 .project-card {
-  background: white;
+  background: #fff;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px 18px;
   cursor: pointer;
-  border: 1px solid #e8eaf0;
-  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1px solid #e4e8ef;
+  transition: box-shadow 0.18s, transform 0.18s, border-color 0.18s;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .project-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.09);
   transform: translateY(-2px);
+  border-color: #c8d3e2;
+}
+
+/* Overdue */
+.project-card--overdue {
+  border-color: #f97316;
+  border-width: 1.5px;
+}
+.project-card--overdue:hover {
+  box-shadow: 0 4px 18px rgba(249,115,22,0.18);
+  border-color: #ea580c;
+}
+
+.project-overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #c2410c;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 20px;
+  padding: 3px 9px;
+  margin-bottom: 10px;
+  width: fit-content;
 }
 
 .project-name {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 8px;
+  color: #1a2535;
+  margin-bottom: 5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .project-meta {
-  font-size: 13px;
-  color: #888;
+  font-size: 11.5px;
+  color: #8896ab;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Progress bar */
+.project-progress {
+  height: 4px;
+  background: #eef0f4;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.project-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: #3b82f6;
+  transition: width 0.4s ease;
+}
+.project-progress-fill--green  { background: #22c55e; }
+.project-progress-fill--orange { background: #f97316; }
+.project-progress-fill--purple { background: #8b5cf6; }
+
+.project-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.project-progress-label {
+  font-size: 11px;
+  color: #aab4c0;
 }
 
 .project-open {
-  font-size: 13px;
-  color: #185FA5;
+  font-size: 12px;
+  color: #3b82f6;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: gap 0.15s;
 }
+.project-card:hover .project-open { gap: 6px; }
 
-.project-empty {
-  padding: 40px 0;
-  color: #aaa;
+/* Stage dot */
+.pl-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+.pl-dot--orange { background: #f97316; }
+.pl-dot--gray   { background: #94a3b8; }
+
+/* States */
+.project-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 0;
+  color: #8896ab;
   font-size: 14px;
 }
 
+.pl-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e4e8ef;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.project-empty {
+  padding: 48px 0;
+  color: #8896ab;
+  font-size: 14px;
+  text-align: center;
+}
+
 .project-error {
-  background: #fdecea;
-  border-left: 4px solid #c62828;
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
   border-radius: 8px;
   padding: 16px 20px;
-  color: #c62828;
+  color: #dc2626;
   font-size: 14px;
   line-height: 1.7;
 }
 
 .project-error-hint {
-  color: #555;
+  color: #6b7280;
   margin-top: 8px;
+  font-size: 13px;
 }
 
 .project-error-hint code {
   display: inline-block;
   margin-top: 4px;
-  background: #f4f4f4;
+  background: #f9fafb;
   padding: 4px 10px;
   border-radius: 4px;
-  font-size: 13px;
-  color: #1a1a2e;
-}
-
-/* ── Overdue state ───────────────────────────────────────────── */
-.project-card--overdue {
-  border-color: #f97316;
-  box-shadow: 0 0 0 2px #f9731622;
-}
-
-.project-card--overdue:hover {
-  box-shadow: 0 4px 20px rgba(249,115,22,0.2), 0 0 0 2px #f9731644;
-}
-
-.project-overdue-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #ea580c;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-radius: 20px;
-  padding: 3px 10px;
-  margin-bottom: 10px;
-}
-
-.project-error {
-  background: #fdecea;
-  border-left: 4px solid #c62828;
-  padding: 16px 20px;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #c62828;
-}
-
-.project-error-hint {
-  margin-top: 8px;
-  color: #555;
-  font-size: 13px;
-}
-
-.project-error-hint code {
-  background: #f4f4f4;
-  padding: 2px 6px;
-  border-radius: 4px;
   font-size: 12px;
-}
-
-/* ── Overdue card ─────────────────────────────────────────── */
-.project-card--overdue {
-  border: 2px solid #f97316;
-  box-shadow: 0 0 0 3px #f9731620;
-}
-
-.project-card--overdue:hover {
-  box-shadow: 0 4px 20px rgba(249,115,22,0.25), 0 0 0 3px #f9731630;
-}
-
-.project-overdue-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #ea580c;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-radius: 20px;
-  padding: 3px 10px;
-  margin-bottom: 10px;
+  color: #1a2535;
+  border: 1px solid #e5e7eb;
 }
