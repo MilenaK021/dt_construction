@@ -9,7 +9,8 @@ from api.meeting_mailer   import router as mailer_router
 from api.deadline_alerting import router as alerting_router
 from api.avatar_chat import router as avatar_router
 from api.session_store import router as session_router
-from api.simli_session import router as simli_router
+from api.simli_session  import router as simli_router
+from api.tender_mailer  import router as tender_router
 
 
 @asynccontextmanager
@@ -43,6 +44,7 @@ app.include_router(alerting_router)
 app.include_router(avatar_router)
 app.include_router(session_router)
 app.include_router(simli_router)
+app.include_router(tender_router)
 
 
 # ─────────────────────────────────────────

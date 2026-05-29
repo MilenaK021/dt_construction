@@ -16,3 +16,5 @@ export const avatarEndSession     = (data)      => base.post('/avatar/end-sessio
 export const simliStartSession    = (data)      => base.post('/simli/start-session', data)
 export const simliSdpExchange     = (data)      => base.post('/simli/sdp-exchange', data)
 export const getMeetingHistory    = (id)        => base.get(`/projects/${id}/meeting-history`)
+
+export const sendTenderEmail      = (data)      => base.post('/tenders/send-email', data)

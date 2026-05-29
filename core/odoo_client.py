@@ -83,6 +83,24 @@ class OdooClient:
         )
 
 
+    def set_task_stage(self, task_id: int, stage_name: str) -> bool:
+        """Find a stage by name and set it on the task."""
+        # Find the stage id matching the name (case-insensitive)
+        stages = self._models().execute_kw(
+            ODOO_DB, self._uid, ODOO_PASS,
+            "project.task.type", "search_read",
+            [[["name", "ilike", stage_name]]],
+            {"fields": ["id", "name"], "limit": 5}
+        )
+        if not stages:
+            return False
+        stage_id = stages[0]["id"]
+        return self._models().execute_kw(
+            ODOO_DB, self._uid, ODOO_PASS,
+            "project.task", "write",
+            [[task_id], {"stage_id": stage_id}]
+        )
+
 if __name__ == "__main__":
     client = OdooClient()
 

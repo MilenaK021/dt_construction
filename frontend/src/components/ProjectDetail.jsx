@@ -3,6 +3,7 @@ import ProjectDashboard from './ProjectDashboard'
 import TaskList from './TaskList'
 import MeetingInvitation from './MeetingInvitation'
 import AvatarChat from './AvatarChat'
+import ReportForm from './ReportForm'
 import './ProjectDetail.css'
 
 export default function ProjectDetail({ project, onBack }) {
@@ -13,6 +14,7 @@ export default function ProjectDetail({ project, onBack }) {
     { id: 'tasks',     label: '✅ Tasks' },
     { id: 'meeting',   label: '📅 Meeting Invitation' },
     { id: 'avatar',    label: '🤖 Try AI Manager' },
+    { id: 'reports',   label: '📋 Submit Report' },
   ]
 
   return (
@@ -36,6 +38,7 @@ export default function ProjectDetail({ project, onBack }) {
         {activeTab === 'dashboard' && <ProjectDashboard projectId={project.id} />}
         {activeTab === 'tasks'     && <TaskList projectId={project.id} />}
         {activeTab === 'meeting'   && <MeetingInvitation projectId={project.id} />}
+        {activeTab === 'reports'   && <ReportForm projectId={project.id} />}
         {activeTab === 'avatar'    && (
           <AvatarChat
             projectId={project.id}

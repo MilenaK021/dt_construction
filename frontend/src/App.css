@@ -331,3 +331,23 @@ body {
 .dt-main::-webkit-scrollbar-track    { background: transparent; }
 .dt-main::-webkit-scrollbar-thumb    { background: rgba(0,0,0,0.15); border-radius: 4px; }
 .dt-sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+/* ── Loading state (used in router) ─────────────── */
+.project-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 32px 0;
+  color: #8896ab;
+  font-size: 14px;
+}
+
+.pl-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e4e8ef;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
