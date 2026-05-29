@@ -1,0 +1,315 @@
+/* DirectorPage.css */
+
+.dir-page {
+  max-width: 900px;
+}
+
+.dir-page-header {
+  margin-bottom: 24px;
+}
+
+.dir-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a2535;
+  letter-spacing: -0.02em;
+}
+
+.dir-sub {
+  font-size: 13px;
+  color: #8896ab;
+  margin-top: 4px;
+}
+
+/* ── Grid ────────────────────────────────────────── */
+.dir-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Cards ───────────────────────────────────────── */
+.dir-card {
+  background: #fff;
+  border: 1px solid #e4e8ef;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.dir-card--side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* ── Avatar ──────────────────────────────────────── */
+.dir-avatar-wrap {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px dashed #c8d3e2;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: border-color 0.15s;
+}
+.dir-avatar-wrap:hover { border-color: #3b82f6; }
+
+.dir-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dir-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #aab4c0;
+  font-size: 10px;
+  padding: 12px;
+}
+
+.dir-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.dir-avatar-wrap:hover .dir-avatar-overlay { opacity: 1; }
+
+.dir-side-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a2535;
+  margin-bottom: 3px;
+}
+.dir-side-pos {
+  font-size: 12px;
+  color: #8896ab;
+  margin-bottom: 20px;
+}
+
+/* ── Voice mock ──────────────────────────────────── */
+.dir-voice-section {
+  width: 100%;
+  margin-top: auto;
+}
+
+.dir-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8896ab;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.dir-voice-mock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.dir-voice-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f0f2f5;
+  border: 1px solid #e4e8ef;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #6b7a8f;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.dir-voice-hint {
+  font-size: 10.5px;
+  color: #aab4c0;
+}
+
+/* ── Form ────────────────────────────────────────── */
+.dir-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.dir-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dir-field--highlight {
+  background: #f0f6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.dir-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7a8f;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dir-label-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.dir-input {
+  height: 38px;
+  background: #f8f9fc;
+  border: 1px solid #e4e8ef;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: #1a2535;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+  width: 100%;
+}
+.dir-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+  background: #fff;
+}
+.dir-input--accent {
+  background: #fff;
+  border-color: #93c5fd;
+  font-weight: 500;
+}
+.dir-input--accent:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.14);
+}
+
+.dir-field-hint {
+  font-size: 11px;
+  color: #6b7a8f;
+  line-height: 1.5;
+}
+
+/* ── Footer ──────────────────────────────────────── */
+.dir-form-footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.dir-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 22px;
+  height: 38px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.dir-save-btn:hover  { background: #1d4ed8; }
+.dir-save-btn:active { transform: scale(0.98); }
+.dir-save-btn--saved { background: #16a34a; }
+
+/* ── Integrations ────────────────────────────────── */
+.dir-integrations {
+  background: #fff;
+  border: 1px solid #e4e8ef;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.dir-int-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.dir-int-item {
+  background: #f8f9fc;
+  border: 1px solid #e4e8ef;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dir-int-icon { font-size: 20px; }
+
+.dir-int-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a2535;
+}
+
+.dir-int-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  width: fit-content;
+}
+.dir-int-status--connected {
+  background: #dcfce7;
+  color: #166534;
+}
+.dir-int-status--pending {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+/* ── Placeholder pages ───────────────────────────── */
+.placeholder-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 12px;
+  text-align: center;
+}
+.placeholder-icon  { font-size: 48px; }
+.placeholder-title { font-size: 20px; font-weight: 600; color: #1a2535; }
+.placeholder-desc  { font-size: 14px; color: #8896ab; max-width: 320px; line-height: 1.6; }
+
+/* ── Director nav item ───────────────────────────── */
+.dt-nav-item--director {
+  margin: 0 0 4px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding-top: 10px;
+}
