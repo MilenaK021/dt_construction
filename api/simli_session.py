@@ -1,7 +1,5 @@
 """
 simli_session.py  ->  api/simli_session.py
-Uses Simli REST API to generate session token only.
-All WebRTC is handled by simli-client npm package in the frontend.
 """
 
 import os
@@ -25,16 +23,12 @@ class StartSessionRequest(BaseModel):
 
 @router.post("/simli/start-session")
 async def start_session(body: StartSessionRequest):
-    """
-    Generate a Simli session token using their official API format.
-    Frontend uses this token with the simli-client npm package.
-    """
     face_id = body.face_id or SIMLI_FACE_ID
 
     if not SIMLI_API_KEY:
-        raise HTTPException(status_code=500, detail="SIMLI_API_KEY not set in .env")
+        raise HTTPException(status_code=500,
+            detail="SIMLI_API_KEY not set in .env")
 
-    # Official Simli token generation payload per their JS SDK docs
     payload = {
         "config": {
             "faceId":           face_id,
@@ -52,20 +46,44 @@ async def start_session(body: StartSessionRequest):
                 json=payload,
                 headers={"Content-Type": "application/json"},
             )
+
         try:
             data = r.json()
         except Exception:
             data = {"raw_text": r.text}
 
+        # Return full debug info regardless of status so frontend can show it
         if r.status_code != 200:
-            raise HTTPException(status_code=502,
-                detail=f"Simli {r.status_code}: {r.text[:400]}")
+            raise HTTPException(
+                status_code=502,
+                detail=(
+                    f"Simli API returned {r.status_code}. "
+                    f"Body: {r.text[:600]}. "
+                    f"Key prefix: {SIMLI_API_KEY[:8]}... "
+                    f"Face ID: {face_id}"
+                )
+            )
+
+        token = data.get("session_token", "")
+        if not token:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Simli returned 200 but no session_token. Full response: {data}"
+            )
 
         return {
-            "session_token": data.get("session_token", ""),
+            "session_token": token,
             "face_id":       face_id,
         }
+
     except HTTPException:
         raise
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=502,
+            detail="Simli API timed out after 20s")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=502,
+            detail=f"Network error reaching Simli: {e}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+        raise HTTPException(status_code=500,
+            detail=f"{type(e).__name__}: {e}")

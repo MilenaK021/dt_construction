@@ -1,12 +1,18 @@
 /**
  * SimliAvatar.jsx
- * Uses the official simli-client npm package.
- * Install: npm install simli-client  (run in frontend/ folder)
+ * Calls Simli API directly from the browser (required — Simli blocks server-to-server).
+ * Uses simli-client npm package for WebRTC.
+ * Install: npm install simli-client
  */
 
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
-import { simliStartSession } from '../api'
 import './SimliAvatar.css'
+
+// Read from environment — add to frontend/.env:
+// VITE_SIMLI_API_KEY=your_key_here
+// VITE_SIMLI_FACE_ID=dd10cb5a-d31d-4f12-b69f-6db3383c006e
+const SIMLI_API_KEY = import.meta.env.VITE_SIMLI_API_KEY || ''
+const SIMLI_FACE_ID = import.meta.env.VITE_SIMLI_FACE_ID || 'dd10cb5a-d31d-4f12-b69f-6db3383c006e'
 
 const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected }, ref) {
   const [state,  setState]  = useState('idle')
@@ -15,7 +21,7 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
 
   const videoRef  = useRef(null)
   const audioRef  = useRef(null)
-  const clientRef = useRef(null)   // SimliClient instance
+  const clientRef = useRef(null)
 
   const addLog = (msg) => {
     console.log('[Simli]', msg)
@@ -36,66 +42,79 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
       setError('')
       setLog([])
 
-      // Step 1: get session token from our backend
-      addLog('1. Getting session token…')
-      const res   = await simliStartSession({})
-      const token = res.data.session_token
-      if (!token) throw new Error('No session token returned')
-      addLog(`2. Token received (${token.slice(0, 20)}…)`)
+      if (!SIMLI_API_KEY) {
+        throw new Error('VITE_SIMLI_API_KEY not set in frontend/.env')
+      }
 
-      // Step 2: dynamically import simli-client
+      // Step 1: get session token directly from Simli (browser request — allowed)
+      addLog('1. Requesting session token from Simli…')
+      const { generateSimliSessionToken } = await import('simli-client')
+
+      const tokenResult = await generateSimliSessionToken({
+        apiKey: SIMLI_API_KEY,
+        config: {
+          faceId:           SIMLI_FACE_ID,
+          handleSilence:    false,
+          maxSessionLength: 600,
+          maxIdleTime:      180,
+        },
+      })
+
+      const token = tokenResult?.session_token
+      if (!token) throw new Error('No session_token in Simli response: ' + JSON.stringify(tokenResult))
+      addLog(`2. Token OK (${token.slice(0, 16)}…)`)
+
+      // Step 2: init SimliClient
       addLog('3. Loading SimliClient…')
       const { SimliClient } = await import('simli-client')
 
-      // Step 3: create and start client
-      addLog('4. Initialising SimliClient (livekit mode)…')
+      addLog('4. Creating client (livekit mode)…')
       const client = new SimliClient(
         token,
         videoRef.current,
         audioRef.current,
-        null,           // iceServers — null = use livekit mode
-        'info',         // log level
-        'livekit',      // transport mode — more firewall-friendly
+        null,       // no ICE servers needed for livekit
+        'info',
+        'livekit',
       )
       clientRef.current = client
 
-      // Step 4: wire events
       client.on('start', () => {
-        addLog('✅ Connected — avatar live!')
+        addLog('✅ Avatar live!')
         setState('connected')
         onReady?.((data) => sendAudio(data))
       })
 
-      client.on('stop',  () => {
-        addLog('Connection stopped')
+      client.on('stop', () => {
+        addLog('Session stopped')
         setState('idle')
         onDisconnected?.()
       })
 
       client.on('error', (e) => {
         const msg = String(e?.message || e)
-        addLog(`ERROR: ${msg}`)
+        addLog('ERROR: ' + msg)
         setError(msg)
         setState('error')
         onDisconnected?.()
       })
 
       client.on('startup_error', (msg) => {
-        addLog(`STARTUP ERROR: ${msg}`)
-        setError(msg)
+        addLog('STARTUP ERROR: ' + msg)
+        setError(String(msg))
         setState('error')
         onDisconnected?.()
       })
 
-      client.on('speaking', () => addLog('Avatar speaking'))
-      client.on('silent',   () => addLog('Avatar silent'))
+      client.on('speaking', () => addLog('Speaking…'))
+      client.on('silent',   () => addLog('Silent'))
 
       addLog('5. Starting connection…')
       await client.start()
 
     } catch (e) {
       const msg = e?.message || String(e)
-      addLog(`ERROR: ${msg}`)
+      addLog('ERROR: ' + msg)
       setError(msg)
       setState('error')
       onDisconnected?.()
@@ -111,8 +130,6 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
   function sendAudio(float32OrUint8) {
     const client = clientRef.current
     if (!client) return
-
-    // simli-client expects Uint8Array PCM16 at 16kHz
     if (float32OrUint8 instanceof Float32Array) {
       const pcm = new Int16Array(float32OrUint8.length)
       for (let i = 0; i < float32OrUint8.length; i++) {

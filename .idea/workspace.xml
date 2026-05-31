@@ -4,19 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="home page">
+    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="tender monitoring">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core/odoo_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/odoo_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/avatar_chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/avatar_chat.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/simli_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/simli_session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/tender_mailer.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/tender_mailer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ProjectDetail.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ProjectDetail.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ReportForm.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ReportForm.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/ReportForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ReportForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/AvatarChat.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AvatarChat.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/AvatarChat.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AvatarChat.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +133,8 @@
       <workItem from="1779450769995" duration="472000" />
       <workItem from="1779707383056" duration="1554000" />
       <workItem from="1779780890898" duration="1837000" />
-      <workItem from="1780082820204" duration="3159000" />
+      <workItem from="1780082820204" duration="5254000" />
+      <workItem from="1780256017643" duration="3328000" />
     </task>
     <task id="LOCAL-00001" summary="wouwo">
       <option name="closed" value="true" />
@@ -242,7 +240,23 @@
       <option name="project" value="LOCAL" />
       <updated>1779207048976</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="tender monitoring">
+      <option name="closed" value="true" />
+      <created>1780091027195</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1780091027195</updated>
+    </task>
+    <task id="LOCAL-00015" summary="tender monitoring">
+      <option name="closed" value="true" />
+      <created>1780091078405</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1780091078405</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -273,14 +287,15 @@
     <MESSAGE value="ai chat 2" />
     <MESSAGE value="ai chat 3" />
     <MESSAGE value="home page" />
-    <option name="LAST_COMMIT_MESSAGE" value="home page" />
+    <MESSAGE value="tender monitoring" />
+    <option name="LAST_COMMIT_MESSAGE" value="tender monitoring" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx</url>
-          <line>145</line>
+          <line>162</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

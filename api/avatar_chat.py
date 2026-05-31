@@ -323,3 +323,10 @@ def _generate_docx(project_name: str, summary: str, transcript: str) -> str:
     filename = f"session_{safe_name}_{ts}.docx"
     doc.save(REPORTS_DIR / filename)
     return filename
+
+class TTSRequest(BaseModel):
+    text: str
+
+@router.post("/avatar/tts")
+async def text_to_speech(req: TTSRequest):
+    raise HTTPException(status_code=503, detail="TTS unavailable")

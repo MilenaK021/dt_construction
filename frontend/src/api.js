@@ -18,3 +18,4 @@ export const simliSdpExchange     = (data)      => base.post('/simli/sdp-exchang
 export const getMeetingHistory    = (id)        => base.get(`/projects/${id}/meeting-history`)
 
 export const sendTenderEmail      = (data)      => base.post('/tenders/send-email', data)
+export const submitReportFile     = (data)      => base.post('/reports/submit-file', data, { headers: { 'Content-Type': 'multipart/form-data' } })

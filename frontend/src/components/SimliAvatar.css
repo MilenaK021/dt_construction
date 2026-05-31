@@ -1,17 +1,23 @@
 .simli-wrap {
   position: relative;
+  /* Fixed height, centered — avatar fills vertically, black bars on sides */
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: 480px;
   border-radius: 14px;
   overflow: hidden;
   background: #0d0d1a;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .simli-video {
-  width: 100%;
+  /* Fill height, maintain aspect ratio — bars appear left/right */
   height: 100%;
-  object-fit: cover;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
   display: block;
 }
 
@@ -71,8 +77,9 @@
   color: #f87171;
   font-size: 12px;
   text-align: center;
-  max-width: 200px;
+  max-width: 260px;
   margin-bottom: 12px;
+  line-height: 1.5;
 }
 
 .simli-retry-btn {
@@ -85,7 +92,6 @@
   font-weight: 600;
   cursor: pointer;
 }
-
 .simli-retry-btn:hover { background: #0c447c; }
 
 /* ── Live badge ── */
@@ -115,9 +121,8 @@
   font-size: 10px;
   color: #34d399;
   font-family: monospace;
-  max-height: 120px;
+  max-height: 100px;
   overflow-y: auto;
   line-height: 1.5;
 }
-
 .simli-debug-log--error { color: #f87171; }
