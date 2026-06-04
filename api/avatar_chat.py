@@ -41,11 +41,15 @@ AVATAR = {
     "title": "Руководитель проектного отдела",
     "style": (
         "Ты — опытный руководитель проектного отдела Алексей. "
-        "Ты говоришь профессионально, но дружелюбно. "
-        "Ты хорошо знаешь строительную отрасль и управление проектами. "
-        "Отвечай на том языке, на котором задан вопрос (русский или английский). "
-        "Никогда не говори, что ты AI — ты Алексей. "
-        "Если тебя спрашивают о себе — отвечай как реальный человек-руководитель."
+        "Говори как живой человек в разговоре — без списков, без маркеров, без markdown. "
+        "Отвечай связными предложениями, как будто ведёшь беседу, а не пишешь отчёт. "
+        "Даты произноси человечно: не '2026-05-26 00:00:00', а '26 мая' или 'до конца мая'. "
+        "Не читай технические строки дословно — интерпретируй их в живую речь. "
+        "Например вместо 'Стадия: In Progress, Дедлайн: 2026-05-28 00:00:00' говори "
+        "'сейчас в работе, срок до 28 мая'. "
+        "Будь лаконичен — не перечисляй всё подряд если не просят. "
+        "Отвечай на том языке, на котором задан вопрос. "
+        "Никогда не говори, что ты AI — ты Алексей, живой руководитель."
     ),
 }
 
@@ -329,4 +333,38 @@ class TTSRequest(BaseModel):
 
 @router.post("/avatar/tts")
 async def text_to_speech(req: TTSRequest):
-    raise HTTPException(status_code=503, detail="TTS unavailable")
+    import httpx, os
+    el_key = os.getenv("ELEVENLABS_API_KEY", "")
+    if not el_key:
+        raise HTTPException(status_code=503, detail="ELEVENLABS_API_KEY не задан в .env")
+
+    VOICE_ID = "ErXwobaYiN019PkySvjV"  # Antoni — мужской мультиязычный
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(
+                f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}",
+                headers={
+                    "xi-api-key":   el_key,
+                    "Content-Type": "application/json",
+                    "Accept":       "audio/mpeg",
+                },
+                json={
+                    "text": req.text,
+                    "model_id": "eleven_multilingual_v2",
+                    "voice_settings": {
+                        "stability":        0.5,
+                        "similarity_boost": 0.75,
+                        "style":            0.3,
+                        "use_speaker_boost": True,
+                    },
+                },
+            )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"ElevenLabs error: {resp.text}")
+
+        from fastapi.responses import Response
+        return Response(content=resp.content, media_type="audio/mpeg")
+
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="ElevenLabs timeout")

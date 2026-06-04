@@ -157,3 +157,31 @@
   font-weight: 600;
   white-space: nowrap;
 }
+/* ── Chain badge ─────────────────────────────────────────────── */
+.tl-chain-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #185FA5;
+  background: #e8f0fa;
+  border-radius: 6px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* ── Task name + description ─────────────────────────────────── */
+.tl-task-name {
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+.tl-task-desc {
+  font-size: 11px;
+  color: #888;
+  margin-top: 3px;
+  line-height: 1.4;
+  max-width: 320px;
+}
+
+.tl-date-cell { color: #555; font-size: 13px; white-space: nowrap; }
+.tl-dur-cell  { color: #888; font-size: 12px; text-align: center; }

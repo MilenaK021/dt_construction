@@ -77,47 +77,62 @@ export default function TaskList({ projectId }) {
         <thead>
           <tr>
             <th>Task</th>
+            <th>Chain</th>
             <th>Assignees</th>
+            <th>Start</th>
             <th>Deadline</th>
+            <th>Duration</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
           {tasks.map(t => {
-            const status = resolveStatus(t)
-            const assignees = t.description
-              ? t.description
-                  .replace(/([а-яА-Яa-zA-Z])(?=[А-ЯA-Z])/g, '$1, ') // 🔥 вставляет запятую перед заглавной
-                  .split(',')
-                  .map(a => a.trim())
-                  .filter(Boolean)
-              : []
+            const status    = resolveStatus(t)
+            const assignees = t.assignees || []
+            const chainName = t.chain_name || ''
+            const chainId   = t.chain_id   || null
             return (
-                <tr key={t.id}>
-                  <td>{t.name}</td>
-                  <td>
-                    {assignees.length > 0
-                        ? assignees.map((a, i) => (
-                            <span key={i} className="assignee-chip">{a}</span>
-                        ))
-                        : <span style={{color: '#aaa'}}>—</span>}
-                  </td>
-                  <td className={isOverdue(t.date_deadline) ? 'overdue-cell' : ''}>
-                    {formatDate(t.date_deadline)}
-                  </td>
-                  <td>
+              <tr key={t.id}>
+                <td>
+                  <div className="tl-task-name">{t.name}</div>
+                  {t.description && (
+                    <div className="tl-task-desc">{t.description}</div>
+                  )}
+                </td>
+                <td>
+                  {chainName
+                    ? <span className="tl-chain-badge" data-chain={chainId}>{chainName}</span>
+                    : <span style={{color:'#aaa'}}>—</span>}
+                </td>
+                <td>
+                  {assignees.length > 0
+                    ? assignees.map((a, i) => (
+                        <span key={i} className="assignee-chip">{a}</span>
+                      ))
+                    : <span style={{color: '#aaa'}}>—</span>}
+                </td>
+                <td className="tl-date-cell">
+                  {t.date_assign ? formatDate(t.date_assign) : '—'}
+                </td>
+                <td className={isOverdue(t.date_deadline) ? 'overdue-cell' : 'tl-date-cell'}>
+                  {formatDate(t.date_deadline)}
+                </td>
+                <td className="tl-dur-cell">
+                  {t.duration_days ? `${t.duration_days}d` : '—'}
+                </td>
+                <td>
                   <span
-                      className="status-badge"
-                      style={{
-                        background: status.color + '18',
-                        color: status.color,
-                        border: `1px solid ${status.color}33`,
-                      }}
+                    className="status-badge"
+                    style={{
+                      background: status.color + '18',
+                      color: status.color,
+                      border: `1px solid ${status.color}33`,
+                    }}
                   >
                     {status.label}
                   </span>
-                  </td>
-                </tr>
+                </td>
+              </tr>
             )
           })}
         </tbody>

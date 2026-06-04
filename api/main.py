@@ -11,6 +11,8 @@ from api.avatar_chat import router as avatar_router
 from api.session_store import router as session_router
 from api.simli_session  import router as simli_router
 from api.tender_mailer  import router as tender_router
+from api.report_submission import router as report_submission_router
+from api.document_watcher  import watch_all_projects, _last_checked, _processed_doc_ids
 
 
 @asynccontextmanager
@@ -45,6 +47,25 @@ app.include_router(avatar_router)
 app.include_router(session_router)
 app.include_router(simli_router)
 app.include_router(tender_router)
+app.include_router(report_submission_router)
+
+
+# ── Document watcher ──────────────────────────────────────────
+@app.on_event("startup")
+async def start_document_watcher():
+    import asyncio
+    engine = app.state.engine
+    asyncio.create_task(watch_all_projects(engine))
+
+
+@app.get("/documents/watcher-status")
+def watcher_status():
+    """Show which projects are being watched and when last checked."""
+    return {
+        "watched_projects":    list(_last_checked.keys()),
+        "last_checked":        {str(k): v.isoformat() for k, v in _last_checked.items()},
+        "processed_doc_count": len(_processed_doc_ids),
+    }
 
 
 # ─────────────────────────────────────────

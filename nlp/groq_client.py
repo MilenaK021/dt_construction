@@ -47,52 +47,79 @@ def ask(question: str, context: str = "") -> str:
 
 def validate_report(report_text: str, task_name: str) -> dict:
     """
-    Check if an employee's report is complete and valid.
+    Strictly validate an employee's completion report.
     Returns a dict with: is_valid (bool), feedback (str)
     """
-    prompt = f"""You are reviewing a work completion report for a construction task.
+    prompt = f"""You are a construction project manager validating a task completion report.
 
-Task name: {task_name}
+TASK: {task_name}
 
-Employee report:
+SUBMITTED REPORT:
 {report_text}
 
-Check if the report contains:
-1. Description of work actually done
-2. Any problems or issues encountered
-3. Current completion percentage or status
+---
+Evaluate the report against these 3 criteria:
 
-Respond in this exact format:
+1. TASK MATCH: Does the report describe work that is specifically related to "{task_name}"?
+   - FAIL if the report explicitly mentions or is clearly written for a different task name.
+   - FAIL if the work described (e.g. field surveys, drilling) does not match the nature of "{task_name}" (e.g. approval, handover).
+   - When in doubt, compare the key activities in the report to what "{task_name}" would logically involve.
+
+2. WORK DONE: Does the report describe what was actually done?
+   - A few sentences is enough. It does not need to be exhaustive.
+
+3. COMPLETION: Does the report mention a completion percentage OR a clear status
+   (e.g. "done", "completed", "80% complete", "in progress", "завершено на 70%")?
+   - Any reasonable indication of progress counts.
+
+OBSTACLES criterion is optional — the employee may omit it if there were no issues.
+
+APPROVE if criteria 1, 2, and 3 are all met.
+REJECT only if one or more of criteria 1, 2, or 3 is clearly missing.
+
+Respond in this exact format (no extra text):
 VALID: yes or no
-FEEDBACK: one sentence explaining what is missing or confirming it looks good
+MISSING: comma-separated list of failed criteria (1, 2, or 3), or "nothing" if all pass
+FEEDBACK: one sentence — what to fix, or confirmation that the report is complete
 """
 
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": "You are a strict but fair construction project manager reviewing reports."},
+            {"role": "system", "content": (
+                "You are a fair construction project manager reviewing completion reports. "
+                "Approve reports that contain the required information even if briefly stated. "
+                "Reject only when a required criterion is clearly absent."
+            )},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.1,
-        max_tokens=256
+        temperature=0.0,
+        max_tokens=300
     )
 
     raw = response.choices[0].message.content.strip()
 
-    # Parse the response
     lines = raw.splitlines()
     is_valid = False
     feedback = "Could not parse validation response."
+    missing  = ""
 
     for line in lines:
         if line.startswith("VALID:"):
             is_valid = "yes" in line.lower()
+        if line.startswith("MISSING:"):
+            missing = line.replace("MISSING:", "").strip()
         if line.startswith("FEEDBACK:"):
             feedback = line.replace("FEEDBACK:", "").strip()
+
+    # Extra safety: if missing is not "nothing", force rejection
+    if missing and missing.lower() != "nothing":
+        is_valid = False
 
     return {
         "is_valid": is_valid,
         "feedback": feedback,
+        "missing":  missing,
         "raw_response": raw
     }
 

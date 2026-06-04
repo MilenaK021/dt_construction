@@ -89,28 +89,48 @@ def _parse_plan_with_llm(doc_text: str, project_name: str, start_date: str) -> d
         "Extract tasks from the work-plan document and return ONLY a JSON object. "
         "No markdown, no explanation, no text outside the JSON. "
         "If the JSON would be very long, still complete it fully — never truncate. "
-        "Schema: {\"tasks\":[{\"id\":int,\"name\":str,\"name_ru\":str,"
-        "\"section\":str,\"assignees\":[str],\"duration_days\":int,\"depends_on\":[int]}]} "
-        "Rules: "
-        "Each numbered sub-section (1.1, 1.2, 2.1, 2.2 …) becomes exactly ONE task. "
-        "Merge all bullet-point items inside a sub-section into that single task. "
-        "section = the sub-section number exactly as written in the document "
-        "(e.g. '1.1', '2.3') — never omit or alter this field. "
-        "name_ru = the Russian title of that sub-section ONLY, "
-        "with absolutely NO numeric prefix — "
-        "correct: 'Подготовительный этап'; wrong: '1.1 Подготовительный этап'. "
+        "Schema: {\"tasks\":[{"
+        "\"id\": int, "
+        "\"section\": str, "
+        "\"chain_id\": int, "
+        "\"chain_name\": str, "
+        "\"name_ru\": str, "
+        "\"name\": str, "
+        "\"description_ru\": str, "
+        "\"assignees\": [str], "
+        "\"duration_days\": int, "
+        "\"depends_on\": [int]"
+        "}]} "
+
+        "MOST IMPORTANT CONCEPT — chains: "
+        "A chain is a group of tasks that must run sequentially and depend on each other. "
+        "Two chains can run in PARALLEL if their work is truly independent "
+        "(different crews, different locations, different disciplines). "
+        "A delay in one chain does NOT affect tasks in another chain. "
+        "If section 2 can only start after section 1 is fully done — they are ONE chain, not two. "
+        "If section 2 work can start regardless of section 1 — they are separate chains. "
+        "Let the document content (not section numbers) decide chain membership. "
+
+        "Field rules: "
+        "id = sequential integer starting from 1. "
+        "section = sub-section number exactly as written (e.g. '1.1', '2.3'). "
+        "chain_id = integer starting from 1. Tasks in the same sequential chain share the same chain_id. "
+        "  Tasks that can run in parallel get different chain_ids. "
+        "  If ALL tasks must run sequentially (one depends on all previous) — they all get chain_id=1. "
+        "chain_name = short Russian label for the chain, e.g. 'Инженерные изыскания', 'Проектирование'. "
+        "  All tasks with the same chain_id must have the same chain_name. "
+        "name_ru = Russian title of the sub-section ONLY, NO numeric prefix. "
+        "  correct: 'Подготовительный этап'; wrong: '1.1 Подготовительный этап'. "
         "name = concise English translation of name_ru, max 60 chars, no number prefix. "
+        "description_ru = 1-3 sentences describing the specific work to be done, "
+        "  extracted from the document. Write in Russian. "
         "duration_days = minimum integer from any duration range in the document; "
-        "infer from phase totals if the sub-section has no explicit duration. "
-        "depends_on = ids of tasks that must finish before this one starts; "
-        "tasks within the same top-level section are sequential (1.1→1.2→1.3…). "
-        "assignees = job-title strings extracted from the 'Ответственные лица' list "
-        "of the same top-level section, deduplicated — "
-        "e.g. ['Начальник отдела изысканий', 'Старший геодезист']. "
-        "Leave assignees empty [] if none are mentioned for this section. "
-        "SKIP purely informational sub-sections such as report structure descriptions "
-        "('Типовой состав технического отчета', 'Структура сроков') — "
-        "only include actionable work stages."
+        "  infer from section totals if sub-section has no explicit duration. "
+        "depends_on = ids of tasks that must finish before this one starts. "
+        "  Within a chain: each task depends on the previous one in that chain. "
+        "  Across chains: only add cross-chain dependency if the document explicitly states it. "
+        "assignees = job-title strings from 'Ответственные лица', deduplicated. [] if none. "
+        "SKIP purely informational sub-sections. Only include actionable work stages."
     )
 
     user = (
@@ -273,14 +293,27 @@ def _push_to_odoo(odoo_client, project_name: str, plan: dict) -> int:
     plan_id_to_odoo_id = {}   # plan internal id → real Odoo task id
 
     for t in plan["tasks"]:
-        section   = t.get("section", "")
-        name_ru   = t.get("name_ru") or t.get("name") or ""
-        full_name = f"{section} {name_ru}".strip() if section else name_ru
+        section    = t.get("section", "")
+        chain_id   = t.get("chain_id", 1)
+        chain_name = t.get("chain_name", "")
+        name_ru    = t.get("name_ru") or t.get("name") or ""
+        full_name  = f"{section} {name_ru}".strip() if section else name_ru
 
-        # Store assignees AND duration in description so we can read them back later
-        dur         = t.get("duration_days", 5)
-        assignees   = t.get("assignees", [])
-        description = f"[duration:{dur}] " + ", ".join(assignees)
+        dur       = t.get("duration_days", 5)
+        assignees = t.get("assignees", [])
+        desc_ru   = t.get("description_ru", "")
+
+        # Structured metadata — chain replaces phase
+        # Format: [meta:duration=N|chain_id=N|chain_name=X|section=X.X|assignees=A,B]
+        meta = (
+            f"[meta:duration={dur}"
+            f"|chain_id={chain_id}"
+            f"|chain_name={chain_name}"
+            f"|section={section}"
+            f"|assignees={','.join(assignees)}]"
+        )
+        description = f"{meta}\n\n{desc_ru}".strip()
+
 
         odoo_id = odoo_client._models().execute_kw(
             db, uid, pwd,

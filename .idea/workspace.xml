@@ -4,16 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="tender monitoring">
+    <list default="true" id="caffe0d9-fab9-412e-8114-287b3657d327" name="Changes" comment="ai avatar tts">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/avatar_chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/avatar_chat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/simli_session.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/simli_session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/tender_mailer.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/tender_mailer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/AvatarChat.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AvatarChat.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/deadline_alerting.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/deadline_alerting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/project_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/project_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/odoo_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/odoo_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/AvatarChat.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AvatarChat.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/RescheduleBanner.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/RescheduleBanner.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/RescheduleBanner.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/RescheduleBanner.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/TaskList.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/TaskList.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/TaskList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/TaskList.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nlp/groq_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/nlp/groq_client.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -134,7 +139,10 @@
       <workItem from="1779707383056" duration="1554000" />
       <workItem from="1779780890898" duration="1837000" />
       <workItem from="1780082820204" duration="5254000" />
-      <workItem from="1780256017643" duration="3328000" />
+      <workItem from="1780256017643" duration="11687000" />
+      <workItem from="1780336768868" duration="1663000" />
+      <workItem from="1780465665597" duration="193000" />
+      <workItem from="1780570271348" duration="2234000" />
     </task>
     <task id="LOCAL-00001" summary="wouwo">
       <option name="closed" value="true" />
@@ -256,7 +264,15 @@
       <option name="project" value="LOCAL" />
       <updated>1780091078405</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="ai avatar tts">
+      <option name="closed" value="true" />
+      <created>1780259458730</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1780259458730</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -288,14 +304,15 @@
     <MESSAGE value="ai chat 3" />
     <MESSAGE value="home page" />
     <MESSAGE value="tender monitoring" />
-    <option name="LAST_COMMIT_MESSAGE" value="tender monitoring" />
+    <MESSAGE value="ai avatar tts" />
+    <option name="LAST_COMMIT_MESSAGE" value="ai avatar tts" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/frontend/src/components/SimliAvatar.jsx</url>
-          <line>162</line>
+          <line>157</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

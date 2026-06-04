@@ -105,31 +105,48 @@ export default function RescheduleBanner({ projectId }) {
 
           {preview.changes.length === 0 ? (
             <p className="rsb-no-changes">No dependent tasks need rescheduling.</p>
-          ) : (
-            <table className="rsb-table">
-              <thead>
-                <tr>
-                  <th>Task</th>
-                  <th>Current deadline</th>
-                  <th></th>
-                  <th>New deadline</th>
-                </tr>
-              </thead>
-              <tbody>
-                {preview.changes.map(c => (
-                  <tr key={c.task_id} className={c.is_overdue ? 'rsb-row-origin' : ''}>
-                    <td>
-                      {c.name}
-                      {c.is_overdue && <span className="rsb-origin-tag">overdue</span>}
-                    </td>
-                    <td className="rsb-old-date">{c.old_deadline || '—'}</td>
-                    <td className="rsb-arrow">→</td>
-                    <td className="rsb-new-date">{c.new_deadline}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          ) : (() => {
+            // Group changes by chain
+            const chainMap = {}
+            preview.changes.forEach(c => {
+              const key = c.chain_id ?? 0
+              if (!chainMap[key]) chainMap[key] = { name: c.chain_name || `Chain ${key}`, changes: [] }
+              chainMap[key].changes.push(c)
+            })
+            const chains = Object.entries(chainMap).sort((a, b) => a[0] - b[0])
+            return chains.map(([chainId, chain]) => (
+              <div key={chainId} className="rsb-chain-group">
+                <div className="rsb-chain-label">
+                  <span className="rsb-chain-dot" />
+                  {chain.name}
+                </div>
+                <table className="rsb-table">
+                  <thead>
+                    <tr>
+                      <th>Task</th>
+                      <th>Current deadline</th>
+                      <th></th>
+                      <th>New deadline</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chain.changes.map(c => (
+                      <tr key={c.task_id} className={c.is_overdue ? 'rsb-row-origin' : ''}>
+                        <td>
+                          {c.section && <span className="rsb-section-tag">{c.section}</span>}
+                          {c.name}
+                          {c.is_overdue && <span className="rsb-origin-tag">overdue</span>}
+                        </td>
+                        <td className="rsb-old-date">{c.old_deadline?.slice(0,10) || '—'}</td>
+                        <td className="rsb-arrow">→</td>
+                        <td className="rsb-new-date">{c.new_deadline}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))
+          })()}
 
           <div className="rsb-preview-actions">
             <button

@@ -57,15 +57,49 @@ class OdooClient:
                 "depend_on_ids", "description", "date_assign"
             ]
         )
-        # Parse duration_days from description field where we stored it as [duration:N]
         import re
         for t in tasks:
             desc = t.get("description") or ""
-            m    = re.search(r"\[duration:(\d+)\]", desc)
-            t["duration_days"] = int(m.group(1)) if m else 5
-            # Clean display description (remove the tag)
-            t["description"] = re.sub(r"\[duration:\d+\]\s*", "", desc).strip()
+
+            # New format: [meta:duration=N|phase=N|section=X.X|assignees=A,B]
+            meta_match = re.search(r"\[meta:([^\]]+)\]", desc)
+            if meta_match:
+                meta_str = meta_match.group(1)
+                meta = dict(kv.split("=", 1) for kv in meta_str.split("|") if "=" in kv)
+                t["duration_days"] = int(meta.get("duration", 5))
+                t["chain_id"]      = int(meta.get("chain_id", 1))
+                t["chain_name"]    = meta.get("chain_name", "")
+                t["section"]       = meta.get("section", "")
+                # legacy phase fallback
+                t["phase"]         = int(meta.get("chain_id", meta.get("phase", 1)))
+                raw_assignees      = meta.get("assignees", "")
+                t["assignees"]     = [a.strip() for a in raw_assignees.split(",") if a.strip()]
+                # Clean description — remove meta tag, keep human text
+                t["description"]   = re.sub(r"\[meta:[^\]]+\]\s*", "", desc).strip()
+            else:
+                # Legacy format: [duration:N] assignee1, assignee2
+                dur_match = re.search(r"\[duration:(\d+)\]", desc)
+                t["duration_days"] = int(dur_match.group(1)) if dur_match else 5
+                t["phase"]         = self._infer_phase_from_name(t.get("name", ""))
+                t["section"]       = self._infer_section_from_name(t.get("name", ""))
+                t["assignees"]     = []
+                t["description"]   = re.sub(r"\[duration:\d+\]\s*", "", desc).strip()
+
         return tasks
+
+    @staticmethod
+    def _infer_phase_from_name(name: str) -> int:
+        """Extract phase from task name like '1.2 Полевой этап' → 1"""
+        import re
+        m = re.match(r"^(\d+)\.", name.strip())
+        return int(m.group(1)) if m else 1
+
+    @staticmethod
+    def _infer_section_from_name(name: str) -> str:
+        """Extract section from task name like '1.2 Полевой этап' → '1.2'"""
+        import re
+        m = re.match(r"^(\d+\.\d+)", name.strip())
+        return m.group(1) if m else ""
 
     def get_employees(self):
         return self._call(

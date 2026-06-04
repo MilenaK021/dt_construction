@@ -184,9 +184,38 @@ def reschedule_preview(project_id: int, request: Request):
                 proposed_end[tid] = needed
                 changed = True
 
-    # Build change list — only tasks where deadline actually changes
-    changes = []
+    # Build change list
+    # Pass 1: all overdue tasks — always included, new deadline = today + duration
+    changes  = []
+    included = set()
+
+    for t in tasks:
+        old_dl = _parse(t.get("date_deadline"))
+        stage  = _stage_name(t)
+        if not old_dl or stage in ("Done", "Cancelled"):
+            continue
+        if old_dl < today:
+            dur    = t.get("duration_days") or 5
+            new_dl = _add_working_days(today, dur)
+            # If dependency chain gives a later date, use that
+            if t["id"] in proposed_end and proposed_end[t["id"]] > new_dl:
+                new_dl = proposed_end[t["id"]]
+            changes.append({
+                "task_id":      t["id"],
+                "name":         t["name"],
+                "old_deadline": t.get("date_deadline", ""),
+                "new_deadline": new_dl.strftime("%Y-%m-%d"),
+                "is_overdue":   True,
+                "chain_id":     t.get("chain_id", 0),
+                "chain_name":   t.get("chain_name", ""),
+                "section":      t.get("section", ""),
+            })
+            included.add(t["id"])
+
+    # Pass 2: dependent tasks whose deadline shifted (not already included)
     for task_id, new_dl in proposed_end.items():
+        if task_id in included:
+            continue
         t      = by_id[task_id]
         old_dl = _parse(t.get("date_deadline"))
         if not old_dl or old_dl == new_dl:
@@ -196,11 +225,28 @@ def reschedule_preview(project_id: int, request: Request):
             "name":         t["name"],
             "old_deadline": t.get("date_deadline", ""),
             "new_deadline": new_dl.strftime("%Y-%m-%d"),
-            "is_overdue":   old_dl < today and _stage_name(t) not in ("Done", "Cancelled"),
+            "is_overdue":   False,
+            "chain_id":     t.get("chain_id", 0),
+            "chain_name":   t.get("chain_name", ""),
+            "section":      t.get("section", ""),
         })
 
     changes.sort(key=lambda c: c["new_deadline"])
-    return {"changes": changes}
+    # Group changes by chain for cleaner display
+    chains_affected = {}
+    for c in changes:
+        cid   = c.get("chain_id", 0)
+        cname = c.get("chain_name", "")
+        if cid not in chains_affected:
+            chains_affected[cid] = cname
+
+    return {
+        "changes":          changes,
+        "chains_affected":  [
+            {"chain_id": k, "chain_name": v}
+            for k, v in sorted(chains_affected.items())
+        ],
+    }
 
 
 @router.post("/projects/{project_id}/reschedule/confirm")

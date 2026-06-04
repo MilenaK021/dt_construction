@@ -1,27 +1,23 @@
 /**
- * SimliAvatar.jsx
- * Calls Simli API directly from the browser (required — Simli blocks server-to-server).
- * Uses simli-client npm package for WebRTC.
- * Install: npm install simli-client
+ * SimliAvatar.jsx — simli-client v3
+ * Реальные события LivekitTransport: start / error / startup_error
  */
 
 import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react'
 import './SimliAvatar.css'
 
-// Read from environment — add to frontend/.env:
-// VITE_SIMLI_API_KEY=your_key_here
-// VITE_SIMLI_FACE_ID=dd10cb5a-d31d-4f12-b69f-6db3383c006e
 const SIMLI_API_KEY = import.meta.env.VITE_SIMLI_API_KEY || ''
 const SIMLI_FACE_ID = import.meta.env.VITE_SIMLI_FACE_ID || 'dd10cb5a-d31d-4f12-b69f-6db3383c006e'
 
 const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected }, ref) {
-  const [state,  setState]  = useState('idle')
-  const [error,  setError]  = useState('')
-  const [log,    setLog]    = useState([])
+  const [state, setState] = useState('idle')
+  const [error, setError] = useState('')
+  const [log,   setLog]   = useState([])
 
-  const videoRef  = useRef(null)
-  const audioRef  = useRef(null)
-  const clientRef = useRef(null)
+  const videoRef     = useRef(null)
+  const audioRef     = useRef(null)
+  const clientRef    = useRef(null)
+  const isConnecting = useRef(false)
 
   const addLog = (msg) => {
     console.log('[Simli]', msg)
@@ -29,7 +25,6 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
   }
 
   useImperativeHandle(ref, () => ({
-    start:     () => connect(),
     stop:      () => disconnect(),
     sendAudio: (data) => sendAudio(data),
   }))
@@ -37,18 +32,24 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
   useEffect(() => () => disconnect(), [])
 
   async function connect() {
+    if (isConnecting.current) return
+
+    if (clientRef.current) {
+      try { await clientRef.current.stop() } catch (_) {}
+      clientRef.current = null
+      await new Promise(r => setTimeout(r, 2000))
+    }
+
+    isConnecting.current = true
     try {
       setState('connecting')
       setError('')
       setLog([])
 
-      if (!SIMLI_API_KEY) {
-        throw new Error('VITE_SIMLI_API_KEY not set in frontend/.env')
-      }
+      if (!SIMLI_API_KEY) throw new Error('VITE_SIMLI_API_KEY не задан в frontend/.env')
 
-      // Step 1: get session token directly from Simli (browser request — allowed)
-      addLog('1. Requesting session token from Simli…')
-      const { generateSimliSessionToken } = await import('simli-client')
+      addLog('1. Запрашиваем токен у Simli…')
+      const { generateSimliSessionToken, SimliClient } = await import('simli-client')
 
       const tokenResult = await generateSimliSessionToken({
         apiKey: SIMLI_API_KEY,
@@ -61,70 +62,63 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
       })
 
       const token = tokenResult?.session_token
-      if (!token) throw new Error('No session_token in Simli response: ' + JSON.stringify(tokenResult))
-      addLog(`2. Token OK (${token.slice(0, 16)}…)`)
+      if (!token) throw new Error('Нет session_token: ' + JSON.stringify(tokenResult))
+      addLog(`2. Токен получен (${token.slice(0, 16)}…)`)
 
-      // Step 2: init SimliClient
-      addLog('3. Loading SimliClient…')
-      const { SimliClient } = await import('simli-client')
-
-      addLog('4. Creating client (livekit mode)…')
+      addLog('3. Создаём SimliClient (livekit)…')
       const client = new SimliClient(
         token,
         videoRef.current,
         audioRef.current,
-        null,       // no ICE servers needed for livekit
-        'info',
+        null,
+        undefined,
         'livekit',
       )
       clientRef.current = client
 
+      // Реальные события в v3 LivekitTransport: 'start', 'error', 'startup_error'
       client.on('start', () => {
-        addLog('✅ Avatar live!')
+        addLog('✅ Аватар живой!')
         setState('connected')
+        isConnecting.current = false
         onReady?.((data) => sendAudio(data))
       })
 
-      client.on('stop', () => {
-        addLog('Session stopped')
-        setState('idle')
-        onDisconnected?.()
-      })
-
-      client.on('error', (e) => {
-        const msg = String(e?.message || e)
-        addLog('ERROR: ' + msg)
-        setError(msg)
-        setState('error')
-        onDisconnected?.()
-      })
-
       client.on('startup_error', (msg) => {
-        addLog('STARTUP ERROR: ' + msg)
-        setError(String(msg))
+        const m = String(msg || 'startup error')
+        addLog('STARTUP ERROR: ' + m)
+        setError(m)
         setState('error')
+        isConnecting.current = false
         onDisconnected?.()
       })
 
-      client.on('speaking', () => addLog('Speaking…'))
-      client.on('silent',   () => addLog('Silent'))
+      client.on('error', (msg) => {
+        const m = String(msg?.message || msg || 'error')
+        addLog('ОШИБКА: ' + m)
+        setError(m)
+        setState('error')
+        isConnecting.current = false
+        onDisconnected?.()
+      })
 
-      addLog('5. Starting connection…')
+      addLog('4. Подключаемся…')
       await client.start()
 
     } catch (e) {
       const msg = e?.message || String(e)
-      addLog('ERROR: ' + msg)
+      addLog('ОШИБКА: ' + msg)
       setError(msg)
       setState('error')
+      isConnecting.current = false
       onDisconnected?.()
     }
   }
 
   function disconnect() {
+    isConnecting.current = false
     try { clientRef.current?.stop() } catch (_) {}
     clientRef.current = null
-    setState('idle')
   }
 
   function sendAudio(float32OrUint8) {
@@ -150,6 +144,7 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
       {state === 'idle' && (
         <div className="simli-overlay">
           <div className="simli-placeholder">АГ</div>
+          <button className="simli-connect-btn" onClick={connect}>▶ Подключить видео</button>
         </div>
       )}
 
@@ -172,7 +167,10 @@ const SimliAvatar = forwardRef(function SimliAvatar({ onReady, onDisconnected },
           <div className="simli-debug-log simli-debug-log--error">
             {log.map((l, i) => <div key={i}>{l}</div>)}
           </div>
-          <button className="simli-retry-btn" onClick={connect}>Retry</button>
+          <button className="simli-retry-btn" onClick={connect}>🔄 Попробовать снова</button>
+          {error.includes('RATE LIMIT') && (
+            <div className="simli-rate-hint">Подождите 1-2 минуты — Simli освободит старую сессию</div>
+          )}
         </div>
       )}
 

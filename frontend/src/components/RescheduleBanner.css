@@ -230,3 +230,41 @@
 }
 
 @keyframes rsb-spin { to { transform: rotate(360deg); } }
+/* ── Chain grouping ───────────────────────────────────────────── */
+.rsb-chain-group {
+  margin-bottom: 20px;
+}
+
+.rsb-chain-group:last-child { margin-bottom: 0; }
+
+.rsb-chain-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #185FA5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.rsb-chain-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #185FA5;
+  flex-shrink: 0;
+}
+
+.rsb-section-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  background: #f4f6f9;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-right: 6px;
+  vertical-align: middle;
+}

@@ -126,3 +126,28 @@
   line-height: 1.5;
 }
 .simli-debug-log--error { color: #f87171; }
+/* ── Connect button (idle state) ── */
+.simli-connect-btn {
+  margin-top: 20px;
+  background: #185FA5;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.simli-connect-btn:hover  { background: #0c447c; transform: scale(1.03); }
+.simli-connect-btn:active { transform: scale(0.97); }
+
+/* ── Rate limit hint ── */
+.simli-rate-hint {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.5);
+  font-size: 11px;
+  text-align: center;
+  max-width: 240px;
+  line-height: 1.5;
+}
