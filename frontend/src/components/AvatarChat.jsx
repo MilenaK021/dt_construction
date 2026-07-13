@@ -17,6 +17,22 @@ const SUGGESTIONS = [
   'Что нужно сделать в первую очередь?',
 ]
 
+// ── Silence keepalive: send silent PCM frames so Simli WS doesn't time out ───
+// 6400 bytes = 3200 int16 samples = 200ms of silence at 16kHz
+const SILENCE_CHUNK = new Uint8Array(6400)
+let _keepaliveTimer = null
+
+function startSimliKeepalive(sendAudio) {
+  stopSimliKeepalive()
+  _keepaliveTimer = setInterval(() => {
+    try { sendAudio(SILENCE_CHUNK) } catch (_) {}
+  }, 500) // every 500ms
+}
+
+function stopSimliKeepalive() {
+  if (_keepaliveTimer) { clearInterval(_keepaliveTimer); _keepaliveTimer = null }
+}
+
 // ── ElevenLabs TTS → PCM → Simli ─────────────────────────────────────────────
 async function speakWithSimli(text, sendAudio) {
   const res = await fetch('/api/avatar/tts', {
@@ -41,6 +57,9 @@ async function speakWithSimli(text, sendAudio) {
     const s  = Math.max(-1, Math.min(1, raw[i]))
     pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff
   }
+
+  // Stop keepalive while sending real audio
+  stopSimliKeepalive()
 
   const CHUNK = 4096
   for (let i = 0; i < pcm16.length; i += CHUNK) {
@@ -117,6 +136,8 @@ export default function AvatarChat({ projectId, projectName }) {
   const handleSimliReady = useCallback((sendAudio) => {
     sendAudioFn.current = sendAudio
     setSimliReady(true)
+    // Keep Simli WS alive during silence
+    startSimliKeepalive(sendAudio)
   }, [])
 
   const speak = useCallback(async (text) => {
@@ -138,6 +159,8 @@ export default function AvatarChat({ projectId, projectName }) {
       try { await speakBrowser(text) } catch (_) {}
     } finally {
       setSpeaking(false)
+      // Resume keepalive after speaking finishes
+      if (sendAudioFn.current) startSimliKeepalive(sendAudioFn.current)
     }
   }, [])
 
@@ -175,6 +198,7 @@ export default function AvatarChat({ projectId, projectName }) {
     if (!simliOn) {
       setSimliOn(true)
     } else {
+      stopSimliKeepalive()
       simliRef.current?.stop()
       setSimliOn(false)
       setSimliReady(false)
@@ -199,6 +223,7 @@ export default function AvatarChat({ projectId, projectName }) {
 
   const restart = () => {
     window.speechSynthesis?.cancel()
+    stopSimliKeepalive()
     simliRef.current?.stop()
     setSimliOn(false)
     setSimliReady(false)
@@ -254,7 +279,7 @@ export default function AvatarChat({ projectId, projectName }) {
             <SimliAvatar
               ref={simliRef}
               onReady={handleSimliReady}
-              onDisconnected={() => { setSimliReady(false); sendAudioFn.current = null }}
+              onDisconnected={() => { stopSimliKeepalive(); setSimliReady(false); sendAudioFn.current = null }}
             />
           </div>
         )}

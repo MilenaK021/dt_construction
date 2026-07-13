@@ -41,18 +41,21 @@ class DigitalTwinEngine:
             "employees": employees
         }
 
-    def generate_meeting_invitation(self, project_id: int) -> str:
+    def generate_meeting_invitation(self, project_id: int) -> dict:
         """
-        Step 1 + Step 2: Generate a meeting invitation for the project kickoff.
-        In a full system this would be emailed to all employees.
+        Generate structured meeting invitation data based on live Odoo task state.
+        Returns a dict for HTML email rendering.
         """
-        data = self.load_project(project_id)
-        project_name = data["project"]["name"]
-        tasks = data["tasks"]
+        # Use live Odoo tasks (includes stage, deadline, progress)
+        try:
+            tasks = self.odoo.get_tasks(project_id=project_id)
+            project_name = tasks[0]["project_id"][1] if tasks and tasks[0].get("project_id") else f"Project {project_id}"
+        except Exception:
+            data = self.load_project(project_id)
+            tasks = data["tasks"]
+            project_name = data["project"]["name"]
 
-        print(f"\nGenerating meeting invitation for: {project_name}")
-        invitation = generate_meeting_summary(tasks, project_name)
-        return invitation
+        return generate_meeting_summary(tasks, project_name)
 
     # -------------------------
     # STEP 2: ONLINE MEETING

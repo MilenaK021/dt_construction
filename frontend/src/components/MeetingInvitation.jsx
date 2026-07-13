@@ -10,7 +10,8 @@ export default function MeetingInvitation({ projectId }) {
   const [date,        setDate]       = useState('')
   const [time,        setTime]       = useState('')
   const [link,        setLink]       = useState('')
-  const [invitation,  setInvitation] = useState('')
+  const [invitation,     setInvitation]     = useState('')
+  const [invitationData, setInvitationData] = useState({})
   const [generating,  setGenerating] = useState(false)
   const [emails,      setEmails]     = useState('')
   const [sending,     setSending]    = useState(false)
@@ -21,14 +22,39 @@ export default function MeetingInvitation({ projectId }) {
     setGenerating(true)
     try {
       const res = await getMeetingInvitation(projectId)
-      // Append the meeting details to the AI text
-      const details = [
-        `\n─────────────────────────────`,
+      const inv = res.data.invitation  // structured dict from LLM
+
+      // Build readable preview from structured data (no AI-generated date/place)
+      const agendaLines = (inv.agenda || []).map((a, i) => `  ${i+1}. ${a}`).join('\n')
+      const overdueSection = inv.overdue_note ? `\n⚠️ ${inv.overdue_note}` : ''
+      const prioritySection = inv.priority_note ? `\n🎯 ${inv.priority_note}` : ''
+      const stats = inv._stats || {}
+      const statsLine = stats.total
+        ? `Задач: ${stats.total} всего · ${stats.done} выполнено · ${stats.in_progress} в работе · ${stats.overdue} просрочено`
+        : ''
+
+      const preview = [
+        inv.greeting,
+        '',
+        inv.purpose,
+        '',
+        statsLine,
+        '',
+        'Повестка дня:',
+        agendaLines,
+        overdueSection,
+        prioritySection,
+        '',
+        inv.closing,
+        '',
+        '─────────────────────────────',
         `📅 Дата:   ${formatDate(date)}`,
         `🕐 Время:  ${time}`,
         link ? `🔗 Ссылка: ${link}` : null,
-      ].filter(Boolean).join('\n')
-      setInvitation(res.data.invitation + details)
+      ].filter(v => v !== null && v !== undefined).join('\n')
+
+      setInvitation(preview)
+      setInvitationData(inv)   // keep structured for HTML email
       setStep('preview')
     } catch (e) {
       console.error(e)
@@ -49,7 +75,8 @@ export default function MeetingInvitation({ projectId }) {
         date,
         time,
         link,
-        body: invitation,
+        body:       invitation,
+        invitation: invitationData,
       })
       setStep('sent')
     } catch (e) {

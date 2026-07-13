@@ -47,118 +47,176 @@ def ask(question: str, context: str = "") -> str:
 
 def validate_report(report_text: str, task_name: str) -> dict:
     """
-    Strictly validate an employee's completion report.
+    Check if an employee's report is complete and valid.
     Returns a dict with: is_valid (bool), feedback (str)
     """
-    prompt = f"""You are a construction project manager validating a task completion report.
+    prompt = f"""You are reviewing a work completion report for a construction task.
 
-TASK: {task_name}
+Task name: {task_name}
 
-SUBMITTED REPORT:
+Employee report:
 {report_text}
 
----
-Evaluate the report against these 3 criteria:
+Check if the report contains:
+1. Description of work actually done
+2. Any problems or issues encountered
+3. Current completion percentage or status
 
-1. TASK MATCH: Does the report describe work that is specifically related to "{task_name}"?
-   - FAIL if the report explicitly mentions or is clearly written for a different task name.
-   - FAIL if the work described (e.g. field surveys, drilling) does not match the nature of "{task_name}" (e.g. approval, handover).
-   - When in doubt, compare the key activities in the report to what "{task_name}" would logically involve.
-
-2. WORK DONE: Does the report describe what was actually done?
-   - A few sentences is enough. It does not need to be exhaustive.
-
-3. COMPLETION: Does the report mention a completion percentage OR a clear status
-   (e.g. "done", "completed", "80% complete", "in progress", "завершено на 70%")?
-   - Any reasonable indication of progress counts.
-
-OBSTACLES criterion is optional — the employee may omit it if there were no issues.
-
-APPROVE if criteria 1, 2, and 3 are all met.
-REJECT only if one or more of criteria 1, 2, or 3 is clearly missing.
-
-Respond in this exact format (no extra text):
+Respond in this exact format:
 VALID: yes or no
-MISSING: comma-separated list of failed criteria (1, 2, or 3), or "nothing" if all pass
-FEEDBACK: one sentence — what to fix, or confirmation that the report is complete
+FEEDBACK: one sentence explaining what is missing or confirming it looks good
 """
 
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": (
-                "You are a fair construction project manager reviewing completion reports. "
-                "Approve reports that contain the required information even if briefly stated. "
-                "Reject only when a required criterion is clearly absent."
-            )},
+            {"role": "system", "content": "You are a strict but fair construction project manager reviewing reports."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.0,
-        max_tokens=300
+        temperature=0.1,
+        max_tokens=256
     )
 
     raw = response.choices[0].message.content.strip()
 
+    # Parse the response
     lines = raw.splitlines()
     is_valid = False
     feedback = "Could not parse validation response."
-    missing  = ""
 
     for line in lines:
         if line.startswith("VALID:"):
             is_valid = "yes" in line.lower()
-        if line.startswith("MISSING:"):
-            missing = line.replace("MISSING:", "").strip()
         if line.startswith("FEEDBACK:"):
             feedback = line.replace("FEEDBACK:", "").strip()
-
-    # Extra safety: if missing is not "nothing", force rejection
-    if missing and missing.lower() != "nothing":
-        is_valid = False
 
     return {
         "is_valid": is_valid,
         "feedback": feedback,
-        "missing":  missing,
         "raw_response": raw
     }
 
 
-def generate_meeting_summary(tasks: list, project_name: str) -> str:
+def generate_meeting_summary(tasks: list, project_name: str) -> dict:
     """
-    Generate a meeting invitation / summary text based on current tasks.
+    Generate structured meeting invitation data based on current project state.
+    Returns a dict with keys: greeting, purpose, agenda_items, priority_tasks, closing.
+    No date/location — those are added by the frontend/mailer.
     """
-    task_lines = "\n".join([
-        f"- {t['name']} (deadline: {t['date_deadline']}, progress: {t['progress']}%)"
-        for t in tasks
-    ])
+    from datetime import date
+    today = date.today()
 
-    prompt = f"""Write a short professional meeting invitation for a construction project status meeting.
+    # Classify tasks
+    overdue, in_progress, done, upcoming = [], [], [], []
+    for t in tasks:
+        stage = t.get("stage_id", "")
+        stage_name = stage[1] if isinstance(stage, (list, tuple)) else str(stage)
+        dl = t.get("date_deadline", "")
+        dl_date = None
+        if dl:
+            try:
+                from datetime import datetime
+                dl_date = datetime.strptime(dl[:10], "%Y-%m-%d").date()
+            except:
+                pass
 
-Project: {project_name}
-Current tasks:
-{task_lines}
+        if stage_name in ("Done", "Cancelled"):
+            done.append(t)
+        elif dl_date and dl_date < today and stage_name not in ("Done", "Cancelled"):
+            overdue.append({**t, "_days_late": (today - dl_date).days, "_deadline_fmt": dl_date.strftime("%d.%m.%Y")})
+        elif stage_name in ("In Progress",):
+            in_progress.append({**t, "_deadline_fmt": dl_date.strftime("%d.%m.%Y") if dl_date else "—"})
+        else:
+            upcoming.append({**t, "_deadline_fmt": dl_date.strftime("%d.%m.%Y") if dl_date else "—"})
 
-The invitation should:
-- Greet the team
-- State the purpose of the meeting
-- List the key topics (based on the tasks above)
-- Ask them to come prepared
-- Be no longer than 150 words
-- Write in Russian
+    # Priority = overdue first, then closest deadline
+    priority = sorted(overdue, key=lambda t: t.get("_days_late", 0), reverse=True)[:3]
+    if len(priority) < 3:
+        priority += sorted(in_progress, key=lambda t: t.get("date_deadline", ""))[:3 - len(priority)]
+
+    overdue_lines = "\n".join(
+        f"- {t['name']}: просрочено на {t['_days_late']} дн. (дедлайн {t['_deadline_fmt']})"
+        for t in overdue
+    ) or "нет просроченных задач"
+
+    active_lines = "\n".join(
+        f"- {t['name']} (дедлайн {t['_deadline_fmt']})"
+        for t in in_progress[:5]
+    ) or "нет задач в работе"
+
+    priority_lines = "\n".join(
+        f"- {t['name']}"
+        for t in priority
+    ) or "нет приоритетных задач"
+
+    prompt = f"""Ты — руководитель проектного отдела. Напиши текст для письма-приглашения на совещание по проекту.
+
+Проект: {project_name}
+Дата анализа: {today.strftime("%d.%m.%Y")}
+Всего задач: {len(tasks)} | Выполнено: {len(done)} | В работе: {len(in_progress)} | Просрочено: {len(overdue)}
+
+Задачи в работе:
+{active_lines}
+
+Просроченные задачи:
+{overdue_lines}
+
+Приоритетные задачи (требуют особого внимания):
+{priority_lines}
+
+Напиши письмо строго в таком формате (JSON, без markdown, без пояснений):
+{{
+  "greeting": "одно вводное предложение-приветствие коллег",
+  "purpose": "одно предложение — цель совещания, основанная на текущем состоянии проекта",
+  "agenda": ["пункт повестки 1", "пункт повестки 2", "пункт повестки 3"],
+  "overdue_note": "одно предложение о просроченных задачах, или пустая строка если их нет",
+  "priority_note": "одно предложение о приоритетных задачах на ближайший период",
+  "closing": "одно завершающее предложение с просьбой подготовиться"
+}}
+
+Пиши по-русски. Профессиональный, деловой стиль. Без упоминания дат и мест проведения совещания.
 """
 
     response = client.chat.completions.create(
         model=MODEL,
         messages=[
-            {"role": "system", "content": "You are a professional construction project manager."},
+            {"role": "system", "content": "Ты профессиональный менеджер строительных проектов. Отвечай только JSON."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.4,
-        max_tokens=512
+        temperature=0.3,
+        max_tokens=600
     )
 
-    return response.choices[0].message.content
+    import json, re
+    raw = response.choices[0].message.content.strip()
+    raw = re.sub(r"^```[a-z]*\n?", "", raw)
+    raw = re.sub(r"\n?```$", "", raw)
+
+    try:
+        data = json.loads(raw)
+    except:
+        # Fallback to plain text if JSON fails
+        data = {
+            "greeting": "Уважаемые коллеги,",
+            "purpose": f"Приглашаем вас на совещание по проекту «{project_name}».",
+            "agenda": ["Обсуждение текущего прогресса", "Просроченные задачи", "Приоритеты на ближайший период"],
+            "overdue_note": f"Имеется {len(overdue)} просроченных задач, требующих внимания." if overdue else "",
+            "priority_note": "Просим уделить особое внимание приоритетным задачам.",
+            "closing": "Просим прийти подготовленными."
+        }
+
+    # Attach structured stats for HTML rendering
+    data["_stats"] = {
+        "total":     len(tasks),
+        "done":      len(done),
+        "in_progress": len(in_progress),
+        "overdue":   len(overdue),
+    }
+    data["_overdue_tasks"]  = [{"name": t["name"], "days_late": t["_days_late"], "deadline": t["_deadline_fmt"]} for t in overdue]
+    data["_priority_tasks"] = [{"name": t["name"]} for t in priority]
+    data["_project_name"]   = project_name
+
+    return data
 
 
 if __name__ == "__main__":

@@ -138,7 +138,7 @@ function ProjectsPage() {
   const navigate = useNavigate()
   return (
     <div className="pl-page">
-      <TendersModal onOpenTender={t => navigate('/tenders', { state: { tender: t } })} />
+      <TendersModal onClose={() => {}} />
       <div className="pl-page-header">
         <div>
           <h2 className="pl-page-title">Проекты</h2>
